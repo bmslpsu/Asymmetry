@@ -1,20 +1,15 @@
-
-%% Analyze Asymmetry: Summary of this function goes here
-%   Detailed explanation goes here
+function [] = Analyze_Asymmetry(root)
+%% Analyze_Asymmetry: 
+%   
 % INPUTS:
     % root: root directory
-    % Amp: amplitude  of stimulus [deg]
-    % HeadWings: head=1, wings=0
-    % plotTime: show time domain plot (logical)
-    % plotFreq: show frequency domain plots (logical)
-% clear;close all;clc
 clear
 showplot.Time = 0;
 showplot.Freq = 0;
 
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'H:\Experiment_Asymmetry\';
+root.daq = 'E:\Experiment_Asymmetry\';
 root.vid = [root.daq 'Vid\Angles\'];
 
 % Select files
@@ -170,7 +165,7 @@ for kk = 1:nTrial
 end
 disp('DONE')
 
-%% Averages & Figures %%
+%% DAQ Figure %%
 %---------------------------------------------------------------------------------------------------------------------------------
 clc
 figure (4) ; clf ; hold on ; box on ; ylim([-5 5])
@@ -181,7 +176,6 @@ WINGS.daq.GrandMean = [];
 for kk = 1:nFly
     for jj = 1:nVel
         WINGS.daq.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.daq.wba{kk}{jj},2);
-        figure (4) ; hold on
         if jj==1
             h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'r','LineWidth',1);
         elseif jj==2
@@ -196,29 +190,27 @@ for kk = 1:nFly
 end
 
 for kk = 1:nFly
-    figure (4) ; hold on
-        h1 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
-        h2 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
-        
-        h1.Color(4) = 0.3;
-        h2.Color(4) = 0.3;
+    h1 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
+    h2 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
+
+    h1.Color(4) = 0.3;
+    h2.Color(4) = 0.3;
 end
 
 % for kk = 1:nFly
-%     figure (4) ; hold on
 %      	plot(WINGS.daq.time,WINGS.daq.FlyMean.off{kk,1},'k','LineWidth',2)
 % end
 
 WINGS.daq.GrandMean.off = mean(cat(3,WINGS.daq.FlyMean.off{:}),3);
 WINGS.daq.GrandMean.wba = mean((cat(3,WINGS.daq.FlyMean.wba{:})),3);
 
-figure (4) ; hold on
-	plot(WINGS.daq.time,WINGS.daq.GrandMean.wba(:,1),'r','LineWidth',7)
-  	plot(WINGS.daq.time,WINGS.daq.GrandMean.wba(:,2),'b','LineWidth',7)
-	plot(WINGS.daq.time,WINGS.daq.GrandMean.off,'k','LineWidth',10)
-	plot(WINGS.daq.time,0*WINGS.daq.time,'--g','LineWidth',2)
+plot(WINGS.daq.time,WINGS.daq.GrandMean.wba(:,1),'r','LineWidth',7)
+plot(WINGS.daq.time,WINGS.daq.GrandMean.wba(:,2),'b','LineWidth',7)
+plot(WINGS.daq.time,WINGS.daq.GrandMean.off,'k','LineWidth',10)
+plot(WINGS.daq.time,0*WINGS.daq.time,'--g','LineWidth',2)
     
-%% ---------------------------------------------------------------------------------------------------------------------------------    
+%% VID Figure %%
+%---------------------------------------------------------------------------------------------------------------------------------    
 figure (5) ; clf ; hold on ; box on ; ylim([-50 50])
 xlabel('Time (s)')
 ylabel('deg')
@@ -227,7 +219,6 @@ WINGS.vid.GrandMean = [];
 for kk = 1:nFly
     for jj = 1:nVel
         WINGS.vid.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.vid.wba{kk}{jj},2);
-        figure (5) ; hold on
         if jj==1
             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
         elseif jj==2
@@ -242,12 +233,11 @@ for kk = 1:nFly
 end
 
 for kk = 1:nFly
-    figure (5) ; hold on
-        h1 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
-        h2 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
-        
-        h1.Color(4) = 0.3;
-        h2.Color(4) = 0.3;
+    h1 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
+    h2 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
+
+    h1.Color(4) = 0.3;
+    h2.Color(4) = 0.3;
 end
 
 % for kk = 1:nFly
@@ -258,10 +248,12 @@ end
 WINGS.vid.GrandMean.off = mean(cat(3,WINGS.vid.FlyMean.off{:}),3);
 WINGS.vid.GrandMean.wba = mean((cat(3,WINGS.vid.FlyMean.wba{:})),3);
 
-figure (5) ; hold on
-	plot(WINGS.vid.time,WINGS.vid.GrandMean.wba(:,1),'r','LineWidth',7)
-  	plot(WINGS.vid.time,WINGS.vid.GrandMean.wba(:,2),'b','LineWidth',7)
-	plot(WINGS.vid.time,WINGS.vid.GrandMean.off,'k','LineWidth',10)
-	plot(WINGS.vid.time,0*WINGS.vid.time,'--g','LineWidth',2)
+plot(WINGS.vid.time,WINGS.vid.GrandMean.wba(:,1),'r','LineWidth',7)
+plot(WINGS.vid.time,WINGS.vid.GrandMean.wba(:,2),'b','LineWidth',7)
+plot(WINGS.vid.time,WINGS.vid.GrandMean.off,'k','LineWidth',10)
+plot(WINGS.vid.time,0*WINGS.vid.time,'--g','LineWidth',2)
     
-    
+%% Linear Fit %%
+%---------------------------------------------------------------------------------------------------------------------------------    
+  
+end
