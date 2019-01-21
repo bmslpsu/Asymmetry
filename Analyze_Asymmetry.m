@@ -1,5 +1,5 @@
 
-%% Analyze Sinusoids Data: Summary of this function goes here
+%% Analyze Asymmetry: Summary of this function goes here
 %   Detailed explanation goes here
 % INPUTS:
     % root: root directory
@@ -10,36 +10,41 @@
 % clear;close all;clc
 clear
 showplot.Time = 0;
-showplot.Sacd = 0;
 
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.pat = 'H:\Experiment_HeadExcitation\Ramp\';
-root.head = [root.pat '\Vid\Angles\'];
+root.daq = 'H:\Experiment_Asymmetry\';
+root.vid = [root.daq 'Vid\Angles\'];
 
 % Select files
-[FILES, PATH.head] = uigetfile({'*.mat', 'DAQ-files'}, ...
-    'Select head angle trials', root.head, 'MultiSelect','on');
+[FILES, PATH.vid] = uigetfile({'*.mat', 'DAQ-files'}, ...
+    'Select head angle trials', root.vid, 'MultiSelect','on');
 FILES = FILES';
 
-PATH.pat = uigetdir(root.pat);
-PATH.pat = [PATH.pat '\'];
+PATH.daq = uigetdir(root.daq);
+PATH.daq = [PATH.pat '\'];
 
 %% Process File Data %%
 %---------------------------------------------------------------------------------------------------------------------------------
 % clearvars -except FILES PATH Amp
 % close all
 clc
-% Read in data from head file names: [Fly=FLy#, Trial=trial# for each fly]nTrial = length(FILES);     % total # of trials
-nTrial = length(FILES);     % total # of trials
-Fly = zeros(nTrial,1); Trial = zeros(nTrial,1); Vel = zeros(nTrial,1); HEAD.FileCells = cell(nTrial,6);% preallocate arrays
+
+nTrial = length(FILES); % total # of trials
+Fly = zeros(nTrial,1); Trial = zeros(nTrial,1); Vel = zeros(nTrial,1); WINGS.FileCells = cell(nTrial,6);% preallocate arrays
 for jj = 1:nTrial
     temp = textscan(char(FILES{jj}), '%s', 'delimiter', '_.'); temp = temp{1} ; % read individual strings into temp variable
-    HEAD.FileCells(jj,:) = {temp{1} temp{2} temp{3} temp{4} temp{5} temp{6}}; % separate strings into six rows with one item in each cell
+    WINGS.FileCells(jj,:) = {temp{1} temp{2} temp{3} temp{4} temp{5} temp{6}}; % separate strings into six rows with one item in each cell
     Fly(jj,1) = str2double(temp{2}); % store fly #
     Trial(jj,1) = str2double(temp{4}); % store trial #
-	Vel(jj,1) = str2double(temp{6});   
+    
+    if strcmp(temp{5},'CW')
+        Vel(jj,1) =  45;
+    elseif strcmp(temp{5},'CCW')
+        Vel(jj,1) = -45;
+    end
 end
+
 %% Set up indexing convention for files %%
 % Normalize to start at fly#1 and increment by 1 for each fy (same for trials)
 %---------------------------------------------------------------------------------------------------------------------------------
@@ -75,45 +80,32 @@ disp(T)
 %% Get Data %%
 %---------------------------------------------------------------------------------------------------------------------------------
 disp('Loading Data...')
-clear HEAD PAT WING head pat wings Amplitude
+clear WING
 % Preallocate data cells %
-for kk = 1:nFly % # of flys
-    HEAD.Time{kk,1}         = cell(nVel,1);
-    HEAD.Pos{kk,1}          = cell(nVel,1);
-    HEAD.Vel{kk,1}          = cell(nVel,1);
-    HEAD.VelMed{kk,1}       = cell(nVel,1);
-    HEAD.VelSTD{kk,1}       = cell(nVel,1);
-    HEAD.Err.Pos{kk,1}      = cell(nVel,1);
-    HEAD.Err.Vel{kk,1}      = cell(nVel,1);
-    HEAD.ErrSum.Pos{kk,1} 	= cell(nVel,1);
-    HEAD.ErrSum.Vel{kk,1} 	= cell(nVel,1);
-    
-    PAT.Time{kk,1}          = cell(nVel,1);
-    PAT.Pos{kk,1}           = cell(nVel,1);
-    PAT.Vel{kk,1}           = cell(nVel,1);
-end
+WINGS.WBA.Pos  = cell(nFly,1);
+WINGS.VID.Pos  = cell(nFly,1);
 % Save data in cells %
 for kk = 1:nTrial
-    clear head pat data t_v t_p hAngles % clear temporary variables
+    clear data t_p lAngles rAngles% clear temporary variables
     %-----------------------------------------------------------------------------------------------------------------------------
     % Load head & DAQ data %
-    load([PATH.head  FILES{kk}]); % load head angles % time arrays
-	load([PATH.pat   FILES{kk}]); % load pattern x-position
+    load([PATH.daq  FILES{kk}]); % load WBA
+	load([PATH.vid   FILES{kk}]); % load VDID
 	%-----------------------------------------------------------------------------------------------------------------------------
-	% Get head data %
-	head.Time = t_v; % store head time vector
+	
+    WING.WBA.Time = t_p;
     
-	% Setup filter for head %
-    head.Fs = 1/mean(diff(head.Time)); % sampling frequency [Hz]
-    head.Fc = 20; % cutoff frequency [Hz]
-    [b,a] = butter(2,head.Fc/(head.Fs/2)); % butterworth filter
+    % Setup filter for wings %
+   	Fc = 20; % cutoff frequency [Hz]
+    Fs = 1/mean(diff(WING.WBA.Time)); % sampling frequency DAQ [Hz]
+  	[b,a] = butter(2,Fc/(Fs/2)); % butterworth filter
+    wings.L = data(:,4)
+  	Fs = 200; % sampling frequency VID [Hz]
+    
     
     head.Pos = filtfilt(b,a,hAngles); % filter head position [deg]
     head.Pos = head.Pos - mean(head.Pos); % subtract DC component
-    head.Vel = filtfilt(b,a,diff(head.Pos)./(1/head.Fs)); % filtered velocity [deg/s]
-    head.Vel = [head.Vel ; head.Vel(end)]; % filtered velocity [deg/s]
-    head.VelMed = median(abs(head.Vel)); % velocity median
-    head.VelSTD = std(abs(head.Vel)); % velcoity STD
+
     %-----------------------------------------------------------------------------------------------------------------------------
     % Get pattern data from DAQ %
     pat.Time = t_p; % pattern time
@@ -123,24 +115,19 @@ for kk = 1:nTrial
     pat.Vel = diff(pat.Pos)./(1/head.Fs); % pattern velocity
     pat.Vel = [pat.Vel ; pat.Vel(end)]; % pattern velocity
  	%-----------------------------------------------------------------------------------------------------------------------------
-    % Calculate Head Error %
-    head.Err.Pos = head.Pos - pat.Pos; % position error
-    head.Err.Vel = head.Vel - pat.Vel; % velcoity error
-  	head.ErrSum.Pos = trapz(head.Time,head.Err.Pos); % position error sum
-  	head.ErrSum.Vel = trapz(head.Time,head.Err.Vel); % position velcoity sum
-
+   
 	%-----------------------------------------------------------------------------------------------------------------------------
     % Store data in cells %
     % Head
-	HEAD.Time       {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Time;     % head time
-	HEAD.Pos        {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Pos;      % head position
-    HEAD.Vel        {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Vel;      % head velocity
-    HEAD.VelMed     {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.VelMed;   % mean head velocity
-    HEAD.VelSTD     {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.VelSTD;   % STD head velocity
-    HEAD.Err.Pos    {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Pos;  % head position error
-    HEAD.Err.Vel    {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Vel;  % head velocity error
-    HEAD.ErrSum.Pos	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Pos;  % head position error sum
-    HEAD.ErrSum.Vel	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Vel;  % head velocity error sum
+	WINGS.Time       {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Time;     % head time
+	WINGS.Pos        {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Pos;      % head position
+    WINGS.Vel        {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Vel;      % head velocity
+    WINGS.VelMed     {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.VelMed;   % mean head velocity
+    WINGS.VelSTD     {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.VelSTD;   % STD head velocity
+    WINGS.Err.Pos    {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Pos;  % head position error
+    WINGS.Err.Vel    {idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Vel;  % head velocity error
+    WINGS.ErrSum.Pos	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Pos;  % head position error sum
+    WINGS.ErrSum.Vel	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = head.Err.Vel;  % head velocity error sum
     
     % Pattern
 	PAT.Time  	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = pat.Time;   % pattern time
@@ -188,14 +175,14 @@ rows = 4;
 count = 0; % rejected saccades
 for kk = 1:nFly
     for jj = 1:nVel
-        for ii = 1:size(HEAD.Pos{kk}{jj},2)
-            SacdThresh = HEAD.VelMed{kk}{jj}(:,ii) + 3*HEAD.VelSTD{kk}{jj}(:,ii); % threshold for saccade detetcion (by trial)
+        for ii = 1:size(WINGS.Pos{kk}{jj},2)
+            SacdThresh = WINGS.VelMed{kk}{jj}(:,ii) + 3*WINGS.VelSTD{kk}{jj}(:,ii); % threshold for saccade detetcion (by trial)
             
-            TimeData = HEAD.Time{kk}{jj}(:,ii); % get time data
-            VelData = HEAD.Vel{kk}{jj}(:,ii); % get velocity data
+            TimeData = WINGS.Time{kk}{jj}(:,ii); % get time data
+            VelData = WINGS.Vel{kk}{jj}(:,ii); % get velocity data
             AbsVelData = abs(VelData); % absolute value fo velocity
             SacdVel = AbsVelData; SacdVel(SacdVel<SacdThresh) = 0; % set all data below threshold to 0
-            PosData = HEAD.Pos{kk}{jj}(:,ii); % get position data
+            PosData = WINGS.Pos{kk}{jj}(:,ii); % get position data
          	Fs = 1/mean(diff(TimeData));
 
              % Find local maxima
@@ -273,35 +260,35 @@ for kk = 1:nFly
                         count = count + 1;
                     end
                     
-                    HEAD.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
-                    HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
+                    WINGS.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
+                    WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
                     mm = mm + 1;
                 end
             else
                 Sacs(1,1:16) = nan;
                 Sacs(1,17) = 0;
-                HEAD.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
-                HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
+                WINGS.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
+                WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
             end
             if showplot.Sacd
             figure (34)
                 subplot(rows,ceil(nTrial/rows),pp) ; hold on ; title(['Fly ' num2str(uFly(kk)) ' Vel ' num2str(uVel(jj))])
                     plot( TimeData , AbsVelData ) % velocity data
                     plot( TimeData , SacdThresh*ones(length(TimeData),1) ,'k--') % threshold line
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,7)) ,'b*')
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,12)), ... % start 
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,6)) ,'g*')
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,14)), ... % end 
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,8)) ,'r*')
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,7)) ,'b*')
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,12)), ... % start 
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,6)) ,'g*')
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,14)), ... % end 
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,8)) ,'r*')
                     box on
                     hold off
                     
             figure (102)
                 subplot(ceil(nTrial/rows),rows,pp) ; hold on ; title(['Fly ' num2str(kk) ' Vel ' num2str(uVel(jj))])
-                    plot(HEAD.Time{kk}{jj}(:,ii) , HEAD.Pos{kk}{jj}(:,ii), 'k' )
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,3)) ,'r*')
+                    plot(WINGS.Time{kk}{jj}(:,ii) , WINGS.Pos{kk}{jj}(:,ii), 'k' )
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,3)) ,'r*')
                     xlim([0 10])
                     ylim([-15 15])
                     box on ; grid on
@@ -317,10 +304,10 @@ end
 
 for kk = 1:nFly
     for jj = 1:nVel
-        for ii = 1:size(HEAD.Pos{kk}{jj},2)
-            TimeData = HEAD.Time{kk}{jj}(:,ii); % get time data
-            VelData = HEAD.Vel{kk}{jj}(:,ii); % get velocity data
-            PosData = HEAD.Pos{kk}{jj}(:,ii); % get position data
+        for ii = 1:size(WINGS.Pos{kk}{jj},2)
+            TimeData = WINGS.Time{kk}{jj}(:,ii); % get time data
+            VelData = WINGS.Vel{kk}{jj}(:,ii); % get velocity data
+            PosData = WINGS.Pos{kk}{jj}(:,ii); % get position data
          	Fs = 1/mean(diff(TimeData));
 
              % Find local maxima
@@ -397,35 +384,35 @@ for kk = 1:nFly
                         count = count + 1;
                     end
                     
-                    HEAD.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
-                    HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
+                    WINGS.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
+                    WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
                     mm = mm + 1;
                 end
             else
                 Sacs(1,1:16) = nan;
                 Sacs(1,17) = 0;
-                HEAD.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
-                HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
+                WINGS.SACD.ALL{kk,1}{jj,1}{ii,1} = splitvars(table(Sacs));
+                WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}.Properties.VariableNames = varNames;
             end
             if showplot.Sacd
             figure (34)
                 subplot(rows,ceil(nTrial/rows),pp) ; hold on ; title(['Fly ' num2str(uFly(kk)) ' Vel ' num2str(uVel(jj))])
                     plot( TimeData , AbsVelData ) % velocity data
                     plot( TimeData , SacdThresh*ones(length(TimeData),1) ,'k--') % threshold line
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,7)) ,'b*')
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,12)), ... % start 
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,6)) ,'g*')
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,14)), ... % end 
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,8)) ,'r*')
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,7)) ,'b*')
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,12)), ... % start 
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,6)) ,'g*')
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,14)), ... % end 
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,8)) ,'r*')
                     box on
                     hold off
                     
             figure (102)
                 subplot(ceil(nTrial/rows),rows,pp) ; hold on ; title(['Fly ' num2str(kk) ' Vel ' num2str(uVel(jj))])
-                    plot(HEAD.Time{kk}{jj}(:,ii) , HEAD.Pos{kk}{jj}(:,ii), 'k' )
-                    plot(table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
-                        table2array(HEAD.SACD.ALL{kk,1}{jj,1}{ii,1}(:,3)) ,'r*')
+                    plot(WINGS.Time{kk}{jj}(:,ii) , WINGS.Pos{kk}{jj}(:,ii), 'k' )
+                    plot(table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,13)), ... % peaks
+                        table2array(WINGS.SACD.ALL{kk,1}{jj,1}{ii,1}(:,3)) ,'r*')
                     xlim([0 10])
                     ylim([-15 15])
                     box on ; grid on
@@ -462,29 +449,29 @@ end
 
 %% Saccade Means %%
 %---------------------------------------------------------------------------------------------------------------------------------
-HEAD.SACD.TrialMean = cell(nFly,1);
+WINGS.SACD.TrialMean = cell(nFly,1);
 for kk = 1:nFly
     for jj = 1:nVel
-        for ii = 1:size(HEAD.SACD.ALL{kk}{jj},1)
-            HEAD.SACD.TrialMean{kk,1}{jj,1}(ii,:) = nanmean(table2array(HEAD.SACD.ALL{kk}{jj}{ii}),1); % fly mean
+        for ii = 1:size(WINGS.SACD.ALL{kk}{jj},1)
+            WINGS.SACD.TrialMean{kk,1}{jj,1}(ii,:) = nanmean(table2array(WINGS.SACD.ALL{kk}{jj}{ii}),1); % fly mean
         end
     end
 end
 
-HEAD.SACD.HEAD.FlyMean = cell(nFly,1);
+WINGS.SACD.HEAD.FlyMean = cell(nFly,1);
 for kk = 1:nFly
     for jj = 1:nVel
 %         HEAD.SACD.FlyMean{kk,1}(jj,:) = nanmean(HEAD.SACD.TrialMean{kk}{jj},1); % fly mean
         temp2 = [];
-        for ii = 1:size(HEAD.SACD.ALL{kk}{jj},1)
-            temp1 = table2array(HEAD.SACD.ALL{kk}{jj}{ii});
+        for ii = 1:size(WINGS.SACD.ALL{kk}{jj},1)
+            temp1 = table2array(WINGS.SACD.ALL{kk}{jj}{ii});
             temp2 = [temp2 ; temp1];
-            HEAD.SACD.AllTrial{kk,1}{jj,1} = temp2;
-            HEAD.SACD.FlyMean{kk,1}(jj,:) = nanmean(temp2,1);
+            WINGS.SACD.AllTrial{kk,1}{jj,1} = temp2;
+            WINGS.SACD.FlyMean{kk,1}(jj,:) = nanmean(temp2,1);
         end
     end
 end
-HEAD.SACD.GrandMean = nanmean(cat(3,HEAD.SACD.FlyMean{:}),3);  % calculate grand mean at each frequency
+WINGS.SACD.GrandMean = nanmean(cat(3,WINGS.SACD.FlyMean{:}),3);  % calculate grand mean at each frequency
 
 % Saccade Mean Plots %%
 %---------------------------------------------------------------------------------------------------------------------------------
@@ -500,17 +487,17 @@ for qq = 1:length(dataIdx)
     xlim([-ceil(max(uVel)) ceil(max(uVel))])
     for kk = 1:nFly
         for jj = 1:nVel
-            for ii = 1:size(HEAD.SACD.ALL{kk}{jj},1)
-                sData = table2array(HEAD.SACD.ALL{kk}{jj}{ii}); % induvidual saccades
+            for ii = 1:size(WINGS.SACD.ALL{kk}{jj},1)
+                sData = table2array(WINGS.SACD.ALL{kk}{jj}{ii}); % induvidual saccades
                 plot(uVel(jj),sData(:,dataIdx(qq)),'g*')
                 
 %                 sData = HEAD.SACD.TrialMean{kk}{jj}; % trial mean
 %                 plot(uFreq,sData(ii,dataIdx(qq)),'b*')
             end
         end
-        plot(uVel , HEAD.SACD.FlyMean{kk}(:,dataIdx(qq)) ,'-*') % fly means
+        plot(uVel , WINGS.SACD.FlyMean{kk}(:,dataIdx(qq)) ,'-*') % fly means
     end
-    plot(uVel , HEAD.SACD.GrandMean(:,dataIdx(qq)) ,'k-o','LineWidth',4,'MarkerSize',5) % grand means
+    plot(uVel , WINGS.SACD.GrandMean(:,dataIdx(qq)) ,'k-o','LineWidth',4,'MarkerSize',5) % grand means
 end
        
 %% FUNCTION: FitPanel
