@@ -142,7 +142,7 @@ function [YY, I, Y0, LB, UB, ADX, NO] = hampel(X, Y, DX, T, varargin)
 %   
 %   --- Revision 0 --- 26.01.2012
 %   (1) Release of first edition.
-
+ 
 %% Error Checking
 % Check for correct number of input arguments
 if nargin < 2
