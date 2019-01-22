@@ -1,15 +1,16 @@
 function [] = Analyze_Asymmetry(root)
-%% Analyze_Asymmetry: 
+%% Analyze_Asymmetry: calculates WBA in response to CW & CCW ramps, compares DAQ & VIDEO measurments
 %   
 % INPUTS:
     % root: root directory
-clear
+% OUTPUTS:
+    % 
 showplot.Time = 0;
 showplot.Freq = 0;
 
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'E:\Experiment_Asymmetry\';
+root.daq = 'H:\Experiment_Asymmetry\';
 root.vid = [root.daq 'Vid\Angles\'];
 
 % Select files
@@ -87,8 +88,7 @@ end
 WINGS.daq.time = 0:(1/1000):10;
 WINGS.vid.time = 0:(1/100):10;
 WINGS.vid.time = WINGS.vid.time(1:end-1);
-figure (1) ; clf
-figure (2) ; clf
+close all
 % Save data in cells %
 for kk = 1:nTrial
     clear data t_p lAngles rAngles% clear temporary variables
@@ -128,7 +128,6 @@ for kk = 1:nTrial
     end
  	%-----------------------------------------------------------------------------------------------------------------------------
     % Store data in cells %
-    % Head
 	WINGS.daq.wba 	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = wings.daq.wba;
 	WINGS.vid.wba  	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = wings.vid.wba;
     %-----------------------------------------------------------------------------------------------------------------------------
@@ -176,15 +175,15 @@ WINGS.daq.GrandMean = [];
 for kk = 1:nFly
     for jj = 1:nVel
         WINGS.daq.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.daq.wba{kk}{jj},2);
-        if jj==1
-            h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'r','LineWidth',1);
-        elseif jj==2
-            h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'b','LineWidth',1);
-        end
-        
-        for ii = 1:length(h)
-            h(ii).Color(4) = 0.2;
-        end
+%         if jj==1
+%             h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'r','LineWidth',1);
+%         elseif jj==2
+%             h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'b','LineWidth',1);
+%         end
+%         
+%         for ii = 1:length(h)
+%             h(ii).Color(4) = 0.2;
+%         end
     end
     WINGS.daq.FlyMean.off{kk,1} = WINGS.daq.FlyMean.wba{kk,1}(:,1) + WINGS.daq.FlyMean.wba{kk,1}(:,2);
 end
@@ -206,7 +205,7 @@ WINGS.daq.GrandMean.wba = mean((cat(3,WINGS.daq.FlyMean.wba{:})),3);
 
 plot(WINGS.daq.time,WINGS.daq.GrandMean.wba(:,1),'r','LineWidth',7)
 plot(WINGS.daq.time,WINGS.daq.GrandMean.wba(:,2),'b','LineWidth',7)
-plot(WINGS.daq.time,WINGS.daq.GrandMean.off,'k','LineWidth',10)
+plot(WINGS.daq.time,WINGS.daq.GrandMean.off,'k','LineWidth',8)
 plot(WINGS.daq.time,0*WINGS.daq.time,'--g','LineWidth',2)
     
 %% VID Figure %%
@@ -219,15 +218,15 @@ WINGS.vid.GrandMean = [];
 for kk = 1:nFly
     for jj = 1:nVel
         WINGS.vid.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.vid.wba{kk}{jj},2);
-        if jj==1
-            h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
-        elseif jj==2
-            h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'b','LineWidth',1);
-        end
-        
-        for ii = 1:length(h)
-            h(ii).Color(4) = 0.2;
-        end
+%         if jj==1
+%             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
+%         elseif jj==2
+%             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'b','LineWidth',1);
+%         end
+%         
+%         for ii = 1:length(h)
+%             h(ii).Color(4) = 0.2;
+%         end
     end
     WINGS.vid.FlyMean.off{kk,1} = WINGS.vid.FlyMean.wba{kk,1}(:,1) + WINGS.vid.FlyMean.wba{kk,1}(:,2);
 end
@@ -255,5 +254,52 @@ plot(WINGS.vid.time,0*WINGS.vid.time,'--g','LineWidth',2)
     
 %% Linear Fit %%
 %---------------------------------------------------------------------------------------------------------------------------------    
-  
+figure (6) ; clf
+pp = 1;
+for kk = 1:nFly
+    for jj = 1:nVel
+        nn = length(WINGS.daq.wba{kk}{jj});
+        mm = length(WINGS.vid.wba{kk}{jj});
+        WINGS.daq.wbaRESMP{kk,1}{jj,1} = resample(WINGS.daq.wba{kk}{jj},mm,nn); % resampled daq WBA voltage
+        
+        figure (6) ; hold on ; xlabel('WBA(V)') ; ylabel('WBA(deg)') ; box on
+        ylim([-100 100])
+        xlim([-15 15])
+        for ii = 1:size(WINGS.daq.wbaRESMP{kk}{jj},2)
+%             scatter(WINGS.daq.wbaRESMP{kk}{jj}(:,ii),WINGS.vid.wba{kk}{jj}(:,ii),'ob');
+            
+            WINGS.daq.ALL.wba{pp,1} = WINGS.daq.wbaRESMP{kk}{jj}(:,ii);
+            WINGS.vid.ALL.wba{pp,1} = WINGS.vid.wba{kk}{jj}(:,ii);
+        
+            pp = pp + 1;
+        end
+        
+        
+    end
+end
+lsline
+
+Xdata = cell2mat(WINGS.daq.ALL.wba);
+Ydata = cell2mat(WINGS.vid.ALL.wba);
+
+% [~,m,b] = regression(WINGS.daq.ALL.wba,WINGS.vid.ALL.wba,'one');
+% figure (6); hold on
+%     Xplot = linspace(-8,8,mm);
+%     Yplot = m*linspace(-8,8,mm) + b;
+%     plot(Xplot,Yplot,'r','Linewidth',5)
+%     axis([-10 10 -100 100])
+%     box on
+%     xlabel('WBA (V)')
+%     ylabel('WBA (deg)')
+%     title('LSQ Fit')
+
+figure (7) ; clf ; hold on
+    scatplot(Xdata,Ydata)
+    plot(Xplot,Yplot,'r','Linewidth',5)
+    colorbar
+    axis([-10 10 -100 100])
+    box on
+    xlabel('WBA (V)')
+    ylabel('WBA (deg)')
+
 end
