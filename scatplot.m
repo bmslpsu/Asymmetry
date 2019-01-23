@@ -162,7 +162,7 @@ ms = 5;
 x = randn(1000,1);
 y = randn(1000,1);
 
-out = scatplot(x,y,method,radius,N,n,po,ms)
+out = scatplot(x,y,method,radius,N,n,po,ms);
 
 return
 %~~~~~~~~~~ Data Density ~~~~~~~~~~~~~~
