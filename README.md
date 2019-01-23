@@ -4,7 +4,7 @@ Analysis functions for Asymmetry project
 
 ## Intructions
 1. Download folders "Experiment_Asymmetry" & "Experiment_Asymmetry_Control" from box.com
-2. Edit main functions root folders to your folder location "...\Experiment_Asymmetry" and "...\Experiment_Asymmetry_Control"
+2. Edit main function's root folders to your folder location "...\Experiment_Asymmetry" and "...\Experiment_Asymmetry_Control"
 3. Add all functions to path and run main functions
 
 ***NOTE: Analyze_Asymmetry_Control.m is not complete yet (do not run)
