@@ -8,7 +8,7 @@ Analysis functions for Asymmetry project
 3. Add all functions to path and run main functions
 
 ***NOTE: Analyze_Asymmetry_Control.m is not complete yet (do not run)
-## Main Fucntions
+## Main Functions
 
 * Analyze_Asymmetry.m
 
