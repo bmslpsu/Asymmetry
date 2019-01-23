@@ -7,12 +7,12 @@ function [] = Analyze_Asymmetry()
         % -
 %---------------------------------------------------------------------------------------------------------------------------------
 % User sets these variables %
-showplot.Time = 0;
-showplot.Freq = 0;
+showplot.Time = 0; % shows all WBA trials when loading data
+showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'H:\Experiment_Asymmetry\';
+root.daq = 'E:\Experiment_Asymmetry\';
 root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory
@@ -23,14 +23,14 @@ PATH.daq = [PATH.daq '\'];
 %% Process File Data %%
 %---------------------------------------------------------------------------------------------------------------------------------
 nTrial = length(FILES); % total # of trials
-Fly = zeros(nTrial,1); Trial = zeros(nTrial,1); Vel = zeros(nTrial,1); WINGS.FileCells = cell(nTrial,6);% preallocate arrays
+Fly = zeros(nTrial,1); Trial = zeros(nTrial,1); Vel = zeros(nTrial,1); WINGS.FileCells = cell(nTrial,6); % preallocate arrays
 for jj = 1:nTrial
     temp = textscan(char(FILES{jj}), '%s', 'delimiter', '_.'); temp = temp{1} ; % read individual strings into temp variable
-    WINGS.FileCells(jj,:) = {temp{1} temp{2} temp{3} temp{4} temp{5} temp{6}}; % separate strings columns with one item in each cell
-    Fly(jj,1) = str2double(temp{2}); % store fly #
+    WINGS.FileCells(jj,:) = {temp{1} temp{2} temp{3} temp{4} temp{5} temp{6}};  % separate strings columns with one item in each cell
+    Fly(jj,1) = str2double(temp{2});   % store fly #
     Trial(jj,1) = str2double(temp{4}); % store trial #
     
-    % store velocity
+    % Store velocity
     if strcmp(temp{5},'CW')
         Vel(jj,1) =  45;
     elseif strcmp(temp{5},'CCW')
@@ -165,7 +165,9 @@ WINGS.daq.FlyMean = [];
 WINGS.daq.GrandMean = [];
 for kk = 1:nFly
     for jj = 1:nVel
-        WINGS.daq.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.daq.wba{kk}{jj},2);
+        WINGS.daq.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.daq.wba{kk}{jj},2); % fly mean
+        
+        % plot all trials
         if jj==1
             h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'r','LineWidth',1);
         elseif jj==2
@@ -179,6 +181,7 @@ for kk = 1:nFly
     WINGS.daq.FlyMean.off{kk,1} = WINGS.daq.FlyMean.wba{kk,1}(:,1) + WINGS.daq.FlyMean.wba{kk,1}(:,2);
 end
 
+% plot fly  means
 for kk = 1:nFly
     h1 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
     h2 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
@@ -191,12 +194,14 @@ end
 % 	plot(WINGS.daq.time,WINGS.daq.FlyMean.off{kk,1},'k','LineWidth',2)
 % end
 
+% grand means
 WINGS.daq.GrandMean.off = mean(cat(3,WINGS.daq.FlyMean.off{:}),3);
 WINGS.daq.GrandMean.wba = mean((cat(3,WINGS.daq.FlyMean.wba{:})),3);
-
+% grand STD
 WINGS.daq.GrandSTD.off = std(cat(3,WINGS.daq.FlyMean.off{:}),0,3);
 WINGS.daq.GrandSTD.wba = std((cat(3,WINGS.daq.FlyMean.wba{:})),0,3);
 
+% plot grand means
 [~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,1),WINGS.daq.GrandSTD.wba(:,1),WINGS.daq.time,1,nFly,'r',[0.5 0.5 0.5],0.8,7);
 [~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,2),WINGS.daq.GrandSTD.wba(:,2),WINGS.daq.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
 [~,~] = PlotPatch(WINGS.daq.GrandMean.off,(WINGS.daq.GrandSTD.wba(:,1) + WINGS.daq.GrandSTD.wba(:,2)),WINGS.daq.time,1,nFly,...
@@ -211,7 +216,8 @@ WINGS.vid.FlyMean = [];
 WINGS.vid.GrandMean = [];
 for kk = 1:nFly
     for jj = 1:nVel
-        WINGS.vid.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.vid.wba{kk}{jj},2);
+        WINGS.vid.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.vid.wba{kk}{jj},2); % fly means
+        % plot all trials
         if jj==1
             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
         elseif jj==2
@@ -224,7 +230,7 @@ for kk = 1:nFly
     end
     WINGS.vid.FlyMean.off{kk,1} = WINGS.vid.FlyMean.wba{kk,1}(:,1) + WINGS.vid.FlyMean.wba{kk,1}(:,2);
 end
-
+% plot fly means
 for kk = 1:nFly
     h1 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
     h2 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
@@ -237,12 +243,14 @@ end
 % 	  plot(WINGS.vid.time,WINGS.vid.FlyMean.off{kk,1},'k','LineWidth',2)
 % end
 
+% grand means
 WINGS.vid.GrandMean.off = mean(cat(3,WINGS.vid.FlyMean.off{:}),3);
 WINGS.vid.GrandMean.wba = mean((cat(3,WINGS.vid.FlyMean.wba{:})),3);
-
+% grand STD
 WINGS.vid.GrandSTD.off = std(cat(3,WINGS.vid.FlyMean.off{:}),0,3);
 WINGS.vid.GrandSTD.wba = std((cat(3,WINGS.vid.FlyMean.wba{:})),0,3);
 
+% plot grand means
 [~,~] = PlotPatch(WINGS.vid.GrandMean.wba(:,1),WINGS.vid.GrandSTD.wba(:,1),WINGS.vid.time,1,nFly,'r',[0.5 0.5 0.5],0.8,7);
 [~,~] = PlotPatch(WINGS.vid.GrandMean.wba(:,2),WINGS.vid.GrandSTD.wba(:,2),WINGS.vid.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
 [~,~] = PlotPatch(WINGS.vid.GrandMean.off,(WINGS.vid.GrandSTD.wba(:,1) + WINGS.vid.GrandSTD.wba(:,2)),WINGS.vid.time,1,nFly,...
@@ -275,10 +283,12 @@ lsline
 Xdata = cell2mat(WINGS.daq.ALL.wba);
 Ydata = cell2mat(WINGS.vid.ALL.wba);
 
+% Calculate linear best fit
 [~,m,b] = regression(WINGS.daq.ALL.wba,WINGS.vid.ALL.wba,'one');
 Xplot = linspace(-8,8,mm);
 Yplot = m*linspace(-8,8,mm) + b;
 
+% Scatter plot with fit
 figure (6); hold on
     plot(Xplot,Yplot,'r','Linewidth',5)
     axis([-10 10 -100 100])
@@ -287,6 +297,7 @@ figure (6); hold on
     ylabel('WBA (deg)')
     title('LSQ Fit')
 
+% Scatter density plot with fit
 figure (7) ; clf ; hold on ; title('Scatter Density')
     [~] = scatplot(Xdata,Ydata);
     plot(Xplot,Yplot,'r','Linewidth',5)
