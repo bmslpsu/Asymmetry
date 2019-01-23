@@ -1,13 +1,9 @@
 %%%% Analysis Script for Spatial Frequency Control Experiments (Rigid Tether-WBA) %%%%
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Set directories %%
-clear ; 
-% close all; clc
-% root = [uigetdir() '\']; % user select root folder
-% root = 'Q:\Box Sync\Research\Asymmetry\Experiment_Asymmetry_Control\';
-% root = 'C:\BC\Rigid_data\Experiment_Asymmetry_Control';
+clear ; close all; clc
 root = 'C:\Users\boc5244\Box Sync\Research\Asymmetry\Experiment_Asymmetry_Control';
-% Get file(s)
+
 [Files, dirpath] = uigetfile({'*.mat', 'MAT-files'},'Select fly trials', root, 'MultiSelect','on');
 
 % Sort files naturally based on fly# & trial# (external function)
