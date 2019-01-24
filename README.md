@@ -24,6 +24,10 @@ Analysis functions for Asymmetry project
 
 	*Analysis function for 30-150 deg/s and all spatial frequencys >>> WBA plots for CW & CCW motion (DAQ only)*
 	
+* MakeSpatFreqFig.m
+
+	*Runs ```Analyze_Asymmetry_Control.m``` and compiles results into figure*
+	
 ### Supplementary
 
 * PlotPatch.m
