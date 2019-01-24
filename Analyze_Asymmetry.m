@@ -12,7 +12,7 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'E:\Experiment_Asymmetry\';
+root.daq = 'H:\Experiment_Asymmetry\';
 root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory
@@ -109,8 +109,8 @@ for kk = 1:nTrial
    	Fc = 20; % cutoff frequency [Hz]
     Fs = 200; % sampling frequency [Hz]
   	[b,a] = butter(2,Fc/(Fs/2)); % butterworth filter 
-    wings.vid.L = rAngles(1:wings.vid.EI)';
-    wings.vid.R = lAngles(1:wings.vid.EI)';
+    wings.vid.L = -1*lAngles(1:wings.vid.EI)';
+    wings.vid.R = -1*rAngles(1:wings.vid.EI)';
     
     % Hampel & low-pass filter L & R wings
     X = linspace(1, length(wings.vid.L), length(wings.vid.L));
