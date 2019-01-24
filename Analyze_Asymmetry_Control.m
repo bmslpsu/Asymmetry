@@ -14,8 +14,8 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root = 'H:\Experiment_Asymmetry_Control\HighContrast\';
-
+% root = 'H:\Experiment_Asymmetry_Control\HighContrast\';
+root = 'H:\Experiment_Asymmetry_Control\LowContrast\';
 % Select VIDEO angle files & set DAQ file directory
 [FILES, PATH] = uigetfile({'*.mat', 'DAQ-files'}, 'Select DAQ files', root, 'MultiSelect','on');
 FILES = FILES';
@@ -139,7 +139,7 @@ for kk = 1:nTrial
 end
 disp('DONE')
 
-%% Main Figure %%
+%% Response figure for varying speeds %%
 %---------------------------------------------------------------------------------------------------------------------------------
 WINGS.daq.FlyMean = [];
 WINGS.daq.FlyMeanVel = [];

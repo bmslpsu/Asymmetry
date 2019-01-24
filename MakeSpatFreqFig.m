@@ -1,4 +1,4 @@
-function [] = MakeSpatFreqFig()
+function [] = MakeSpatFreqFig(rows)
 %---------------------------------------------------------------------------------------------------------------------------------
 % MakeSpatFreqFig: Compiles spatial frequency vs speed subplots into one figure
     % INPUTS:
@@ -6,8 +6,17 @@ function [] = MakeSpatFreqFig()
     % OUTPUTS:
         % -
 %---------------------------------------------------------------------------------------------------------------------------------
-    for kk = 1:4
-        Analyze_Asymmetry_Control(4,kk) 
+    pp = 1;
+    while 1
+        Analyze_Asymmetry_Control(rows,pp)
+        x = input('Continue: ');
+        switch x
+            case 1
+            case 0
+                disp('DONE')
+                break
+        end
+        pp = pp + 1;
     end
 %---------------------------------------------------------------------------------------------------------------------------------   
 end
