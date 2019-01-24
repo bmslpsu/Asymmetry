@@ -1,4 +1,4 @@
-function [] = Analyze_Asymmetry_Control()
+function [] = Analyze_Asymmetry_Control(subRows,subCurrent)
 %---------------------------------------------------------------------------------------------------------------------------------
 % Analyze_Asymmetry_Control: calculates WBA in response to CW & CCW ramps, compares DAQ & VIDEO measurments
     % INPUTS:
@@ -9,18 +9,26 @@ function [] = Analyze_Asymmetry_Control()
 % User sets these variables %
 showplot.Time = 0; % shows all WBA trials when loading data
 showplot.Freq = 0; % shows all WBF trials when loading data
+% subRows = 4;
+% subCurrent = 2;
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root = 'H:\Experiment_Asymmetry_Control\';
+root = 'H:\Experiment_Asymmetry_Control\HighContrast\';
 
 % Select VIDEO angle files & set DAQ file directory
 [FILES, PATH] = uigetfile({'*.mat', 'DAQ-files'}, 'Select DAQ files', root, 'MultiSelect','on');
 FILES = FILES';
-temp = textscan(PATH, '%s', 'delimiter','\'); % get spatial frequency (0 = Random)
-spatFreq = temp{1}{4};
 %% Process File Data %%
 %---------------------------------------------------------------------------------------------------------------------------------
+temp = textscan(PATH, '%s', 'delimiter','\'); % get spatial frequency (0 = Random)
+spatFreq = temp{1}{4};
+if strcmp(spatFreq,'0')
+    spatFreq = 'Random';
+else
+    spatFreq = [spatFreq ' ' char(176)];
+end
+
 nTrial = length(FILES); % total # of trials
 Fly = zeros(nTrial,1); Trial = zeros(nTrial,1); Vel = zeros(nTrial,1); Dir = zeros(nTrial,1); % preallocate arrays
 WINGS.FileCells = cell(nTrial,6);
@@ -155,13 +163,31 @@ for jj = 1:nVel
     WINGS.daq.GrandMean.wba{jj,3} = WINGS.daq.GrandMean.wba{jj,2} + WINGS.daq.GrandMean.wba{jj,1}; 
 end
 
-F = figure (3) ; clf
-set(F, 'Position', [100, 100, 1300, 400])
+F = figure (3);
+set(F, 'Position', [100, 100, 1200, 200*subRows])
 for jj = 1:nVel
-    h = subplot(1,nVel,jj) ; hold on ; box on ; title([num2str(uVel(jj)) ' ' char(176) '/s']);
+    subidx = jj + nVel*(subCurrent-1);
+    h = subplot(subRows,nVel,subidx) ; hold on ; box on
         h.FontSize = 12;
-        if jj==3 ; xlabel('Time (s)') ; end
-        if jj==1 ; ylabel({[num2str(spatFreq) char(176)];'V'}) ; end
+        
+        if (subCurrent==1)
+            title([num2str(uVel(jj)) ' ' char(176) '/s']);
+        end
+        
+        if (jj==3) && (subRows==subCurrent)
+            xlabel('Time (s)')
+        end
+        
+        if jj==1
+            ylabel({spatFreq;'V'})
+        else
+            yticklabels('')
+        end
+        
+        if ~(subRows==subCurrent)
+            xticklabels('')
+        end
+                
         xlim([0 10])
         xticks([0 10])
         ylim([-6 6])
