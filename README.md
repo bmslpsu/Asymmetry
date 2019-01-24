@@ -16,28 +16,28 @@ Analysis functions for Asymmetry project
 ## Functions
 ### Main
 
-* Analyze_Asymmetry.m
+* ```Analyze_Asymmetry.m```
 
 	*Analysis function for 45 deg/s random spatial frequency >>> WBA plots for CW & CCW motion (video and DAQ)*
 	
-* Analyze_Asymmetry_Control.m
+* ```Analyze_Asymmetry_Control.m```
 
 	*Analysis function for 30-150 deg/s and all spatial frequencys >>> WBA plots for CW & CCW motion (DAQ only)*
 	
-* MakeSpatFreqFig.m
+* ```MakeSpatFreqFig.m```
 
 	*Runs ```Analyze_Asymmetry_Control.m``` and compiles results into figure*
 	
 ### Supplementary
 
-* PlotPatch.m
+* ```PlotPatch.m```
 
 	*Plots means with STD patch*
 
-* hampel.m
+* ```hampel.m```
 
 	*Hampel filter*
 
-* scatplot.m
+* ```scatplot.m```
 
 	*Scatter plot with densities*
