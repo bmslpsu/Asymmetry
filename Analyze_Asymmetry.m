@@ -206,7 +206,7 @@ WINGS.daq.GrandSTD.wba = std((cat(3,WINGS.daq.FlyMean.wba{:})),0,3);
 [~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,2),WINGS.daq.GrandSTD.wba(:,2),WINGS.daq.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
 [~,~] = PlotPatch(WINGS.daq.GrandMean.off,(WINGS.daq.GrandSTD.wba(:,1) + WINGS.daq.GrandSTD.wba(:,2)),WINGS.daq.time,1,nFly,...
     'k',[0.5 0.5 0.5],0.8,8);
-plot(WINGS.daq.time,0*WINGS.daq.time,'-g','LineWidth',2)
+plot(WINGS.daq.time,0*WINGS.daq.time,'-g','LineWidth',1)
 %% VID Figure %%
 %---------------------------------------------------------------------------------------------------------------------------------    
 figure (5) ; clf ; hold on ; box on ; ylim([-50 50])
