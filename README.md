@@ -11,7 +11,7 @@ Analysis functions for Asymmetry project
 * In the folder "Experiment_Asymmetry" DAQ files are stored in the root, video files in "Vid", and angle files in "Angle".
 * In "Experiment_Asymmetry_Control" there are folders for high constrast, low contrast, & interpolated motion. Each of these folders includes subfolders labeled by spatial frequency (0 = Random). There are no video or angle files associated with these experiments.
 
-## Functions
+## Analysis Functions
 ### Main
 
 * ```Analyze_Asymmetry.m```
@@ -39,3 +39,9 @@ Analysis functions for Asymmetry project
 * ```scatplot.m```
 
 	*Scatter plot with densities*
+	
+## Experiment Functions
+
+* ```Experiment_Asymmetry.m```
+
+	*Runs asymmetry experiment using controller V3 with LED panels, NiDAQ, Basler acA640-120gm camera *
