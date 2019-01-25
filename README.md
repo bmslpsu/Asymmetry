@@ -7,7 +7,7 @@ Analysis functions for Asymmetry project
 2. Edit main function's root folders to your folder location "...\Experiment_Asymmetry" and "...\Experiment_Asymmetry_Control"
 3. Add all functions to path and run main functions
 
-## File Stucture
+## File Structure
 * In the folder "Experiment_Asymmetry" DAQ files are stored in the root, video files in "Vid", and angle files in "Angle".
 * In "Experiment_Asymmetry_Control" there are folders for high constrast, low contrast, & interpolated motion. Each of these folders includes subfolders labeled by spatial frequency (0 = Random). There are no video or angle files associated with these experiments.
 
