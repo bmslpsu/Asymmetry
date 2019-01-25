@@ -44,4 +44,4 @@ Analysis functions for Asymmetry project
 
 * ```Experiment_Asymmetry.m```
 
-	*Runs asymmetry experiment using controller V3 with LED panels, NiDAQ, Basler acA640-120gm camera *
+	* Runs asymmetry experiment using controller V3 with LED panels, NiDAQ, Basler acA640-120gm camera *
