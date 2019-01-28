@@ -1,10 +1,10 @@
 function [] = Analyze_Asymmetry()
 %---------------------------------------------------------------------------------------------------------------------------------
 % Analyze_Asymmetry: calculates WBA in response to CW & CCW ramps, compares DAQ & VIDEO measurments
-    % INPUTS:
-        % -
-    % OUTPUTS:
-        % -
+%   INPUTS:
+%
+%   OUTPUTS:
+%
 %---------------------------------------------------------------------------------------------------------------------------------
 % User sets these variables %
 showplot.Time = 0; % shows all WBA trials when loading data

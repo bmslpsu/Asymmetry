@@ -1,10 +1,11 @@
 function [] = Analyze_Asymmetry_Control(subRows,subCurrent)
 %---------------------------------------------------------------------------------------------------------------------------------
 % Analyze_Asymmetry_Control: calculates WBA in response to CW & CCW ramps, compares DAQ & VIDEO measurments
-    % INPUTS:
-        % -
-    % OUTPUTS:
-        % -
+%   INPUTS:
+%       subRows     : # of subplot rows for the main figure (set=1 if only looking at one data set)
+%       subCurrent  : row # fo specific data set
+%   OUTPUTS:
+%
 %---------------------------------------------------------------------------------------------------------------------------------
 % User sets these variables %
 showplot.Time = 0; % shows all WBA trials when loading data
