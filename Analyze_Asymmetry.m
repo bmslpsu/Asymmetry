@@ -7,8 +7,8 @@ function [] = Analyze_Asymmetry()
         % -
 %---------------------------------------------------------------------------------------------------------------------------------
 % User sets these variables %
-showplot.Time = 1; % shows all WBA trials when loading data
-showplot.Freq = 1; % shows all WBF trials when loading data
+showplot.Time = 0; % shows all WBA trials when loading data
+showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
@@ -168,27 +168,27 @@ for kk = 1:nFly
     for jj = 1:nVel
         WINGS.daq.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.daq.wba{kk}{jj},2); % fly mean
         
-        % plot all trials
-        if jj==1
-            h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'r','LineWidth',1);
-        elseif jj==2
-            h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'b','LineWidth',1);
-        end
-        
-        for ii = 1:length(h)
-            h(ii).Color(4) = 0.1;
-        end
+%         % plot all trials
+%         if jj==1
+%             h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'r','LineWidth',1);
+%         elseif jj==2
+%             h = plot(WINGS.daq.time,WINGS.daq.wba{kk}{jj},'b','LineWidth',1);
+%         end
+%         
+%         for ii = 1:length(h)
+%             h(ii).Color(4) = 0.1;
+%         end
     end
     WINGS.daq.FlyMean.off{kk,1} = WINGS.daq.FlyMean.wba{kk,1}(:,1) + WINGS.daq.FlyMean.wba{kk,1}(:,2);
 end
 
 % plot fly  means
 for kk = 1:nFly
-    h1 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
-    h2 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
+    h1 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,1),'r','LineWidth',1);
+    h2 = plot(WINGS.daq.time,WINGS.daq.FlyMean.wba{kk,1}(:,2),'b','LineWidth',1);
 
-    h1.Color(4) = 0.3;
-    h2.Color(4) = 0.3;
+%     h1.Color(4) = 0.3;
+%     h2.Color(4) = 0.3;
 end
 
 % for kk = 1:nFly
@@ -203,11 +203,12 @@ WINGS.daq.GrandSTD.off = std(cat(3,WINGS.daq.FlyMean.off{:}),0,3);
 WINGS.daq.GrandSTD.wba = std((cat(3,WINGS.daq.FlyMean.wba{:})),0,3);
 
 % plot grand means
-[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,1),WINGS.daq.GrandSTD.wba(:,1),WINGS.daq.time,1,nFly,'r',[0.5 0.5 0.5],0.8,7);
-[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,2),WINGS.daq.GrandSTD.wba(:,2),WINGS.daq.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
+[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,1),0,WINGS.daq.time,1,nFly,'r',[0.5 0.5 0.5],1,5);
+[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,2),0,WINGS.daq.time,1,nFly,'b',[0.5 0.5 0.5],1,5);
 [~,~] = PlotPatch(WINGS.daq.GrandMean.off,(WINGS.daq.GrandSTD.wba(:,1) + WINGS.daq.GrandSTD.wba(:,2)),WINGS.daq.time,1,nFly,...
-    'k',[0.5 0.5 0.5],0.8,8);
+    'k',[0.5 0.5 0.5],1,5);
 plot(WINGS.daq.time,0*WINGS.daq.time,'-g','LineWidth',1)
+box off
 %% VID Figure %%
 %---------------------------------------------------------------------------------------------------------------------------------    
 figure (5) ; clf ; hold on ; box on ; ylim([-50 50])
@@ -218,26 +219,26 @@ WINGS.vid.GrandMean = [];
 for kk = 1:nFly
     for jj = 1:nVel
         WINGS.vid.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.vid.wba{kk}{jj},2); % fly means
-        % plot all trials
-        if jj==1
-            h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
-        elseif jj==2
-            h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'b','LineWidth',1);
-        end
-        
-        for ii = 1:length(h)
-            h(ii).Color(4) = 0.1;
-        end
+%         % plot all trials
+%         if jj==1
+%             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
+%         elseif jj==2
+%             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'b','LineWidth',1);
+%         end
+%         
+%         for ii = 1:length(h)
+%             h(ii).Color(4) = 0.1;
+%         end
     end
     WINGS.vid.FlyMean.off{kk,1} = WINGS.vid.FlyMean.wba{kk,1}(:,1) + WINGS.vid.FlyMean.wba{kk,1}(:,2);
 end
 % plot fly means
 for kk = 1:nFly
-    h1 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
-    h2 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
+    h1 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,1),'r','LineWidth',1);
+    h2 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,2),'b','LineWidth',1);
 
-    h1.Color(4) = 0.3;
-    h2.Color(4) = 0.3;
+%     h1.Color(4) = 0.3;
+%     h2.Color(4) = 0.3;
 end
 
 % for kk = 1:nFly
@@ -256,7 +257,8 @@ WINGS.vid.GrandSTD.wba = std((cat(3,WINGS.vid.FlyMean.wba{:})),0,3);
 [~,~] = PlotPatch(WINGS.vid.GrandMean.wba(:,2),WINGS.vid.GrandSTD.wba(:,2),WINGS.vid.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
 [~,~] = PlotPatch(WINGS.vid.GrandMean.off,(WINGS.vid.GrandSTD.wba(:,1) + WINGS.vid.GrandSTD.wba(:,2)),WINGS.vid.time,1,nFly,...
     'k',[0.5 0.5 0.5],0.8,8);
-plot(WINGS.vid.time,0*WINGS.vid.time,'-g','LineWidth',2)
+plot(WINGS.vid.time,0*WINGS.vid.time,'-g','LineWidth',1)
+box off
 %% DAQ vs VID %%
 %---------------------------------------------------------------------------------------------------------------------------------    
 pp = 1;
@@ -316,10 +318,23 @@ figure (7) ; clf ; hold on ; title('Scatter Density')
 %      
 %  end
 
-mean_off = cellfun(@mean, WINGS.daq.FlyMean.off); % get all means for sum
-figure (8); hist(mean_off)
+% DAQ
+mean_off_daq = cellfun(@mean, WINGS.daq.FlyMean.off); % get all means for sum
+figure (8); histogram(mean_off_daq,10)
+xlim([-3, 3])
+line([0,0],[0 4], 'Color','k')
+box off
 
-[h, p] = ttest(mean_off, 0, 'tail', 'right'); % test if individuals are > 0 V
+[h, p] = ttest(mean_off_daq, 0, 'tail', 'right'); % test if individuals are > 0 V
+
+% VID
+mean_off_vid = cellfun(@mean, WINGS.vid.FlyMean.off); % get all means for sum
+figure (9); histogram(mean_off_vid,10)
+xlim([-3, 3])
+line([0,0],[0 4], 'Color','k')
+box off
+
+[h, p] = ttest(mean_off_vid, 0, 'tail', 'right'); % test if individuals are > 0 V
  
 %---------------------------------------------------------------------------------------------------------------------------------     
 end
