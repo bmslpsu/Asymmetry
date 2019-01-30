@@ -7,12 +7,13 @@ function [] = Analyze_Asymmetry()
         % -
 %---------------------------------------------------------------------------------------------------------------------------------
 % User sets these variables %
-showplot.Time = 0; % shows all WBA trials when loading data
-showplot.Freq = 0; % shows all WBF trials when loading data
+showplot.Time = 1; % shows all WBA trials when loading data
+showplot.Freq = 1; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'H:\Experiment_Asymmetry\';
+%root.daq = 'H:\Experiment_Asymmetry\';
+root.daq = 'C:\JMM\Rigid_data\Experiment_Asymmetry\';
 root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory
@@ -306,4 +307,19 @@ figure (7) ; clf ; hold on ; title('Scatter Density')
     box on
     xlabel('WBA (V)')
     ylabel('WBA (deg)')
+    
+ %% Statistics on Individuals %%
+%  for kk = 1:nFly
+%     
+%      [~,p] = ttest(WINGS.daq.FlyMean.off{kk,1}); % get p value for ttest with H0 = 0
+%      pval(kk,1) = p;    
+%      
+%  end
+
+mean_off = cellfun(@mean, WINGS.daq.FlyMean.off); % get all means for sum
+figure (8); hist(mean_off)
+
+[h, p] = ttest(mean_off, 0, 'tail', 'right'); % test if individuals are > 0 V
+ 
+%---------------------------------------------------------------------------------------------------------------------------------     
 end
