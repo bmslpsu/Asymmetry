@@ -1,6 +1,7 @@
-function [] = Analyze_Asymmetry()
+function [] = Analyze_Asymmetry_Verification()
 %---------------------------------------------------------------------------------------------------------------------------------
-% Analyze_Asymmetry: calculates WBA in response to CW & CCW ramps, compares DAQ & VIDEO measurments
+% Analyze_Asymmetry_Verification: calculates WBA in response to CW & CCW
+% ramps, compares DAQ & VIDEO measurments for new data
 %   INPUTS:
 %
 %   OUTPUTS:
@@ -12,14 +13,12 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'E:\Experiment_Asymmetry\';
-root.vid = [root.daq 'Vid\Angles\'];
+root.daq = 'E:\Experiment_Asymmetry_Verification\';
+% root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory
-[FILES, PATH.vid] = uigetfile({'*.mat', 'DAQ-files'}, 'Select VIDEO angle files', root.vid, 'MultiSelect','on');
+[FILES, PATH.daq] = uigetfile({'*.mat', 'DAQ-files'}, 'Select VIDEO angle files', root.daq, 'MultiSelect','on');
 FILES = FILES';
-PATH.daq = uigetdir(root.daq,'Select DAQ file directory');
-PATH.daq = [PATH.daq '\'];
 %% Process File Data %%
 %---------------------------------------------------------------------------------------------------------------------------------
 nTrial = length(FILES); % total # of trials
@@ -71,58 +70,59 @@ disp(T)
 %---------------------------------------------------------------------------------------------------------------------------------
 disp('Loading Data...')
 clear WINGS
-wings.daq.EI = 10001; % end index for DAQ files
-wings.vid.EI = 1000;  % end index for VID files
+wings.daq.EI = 50000; % end index for DAQ files
+% wings.vid.EI = 1000;  % end index for VID files
 % Preallocate data cells
 for kk = 1:nFly
     WINGS.daq.wba{kk,1} = cell(nVel,1);
     WINGS.vid.wba{kk,1} = cell(nVel,1);
 end
-WINGS.daq.time = (0:(1/1000):10)'; % time vector for DAQ
-WINGS.vid.time = (0:(1/100):10)';  % time vector for VID
-WINGS.vid.time = WINGS.vid.time(1:end-1);
+WINGS.daq.time = (0:(1/5000):10)'; % time vector for DAQ
+WINGS.daq.time = WINGS.daq.time(1:end-1); % time vector for DAQ
+% WINGS.vid.time = (0:(1/100):10)';  % time vector for VID
+% WINGS.vid.time = WINGS.vid.time(1:end-1);
 % Save data in cells
 for kk = 1:nTrial
     clear data t_p lAngles rAngles % clear temporary variables
     %-----------------------------------------------------------------------------------------------------------------------------
     % Load head & DAQ data %
     load([PATH.daq  FILES{kk}],'data','t_p'); % load WBA
-	load([PATH.vid   FILES{kk}],'lAngles','rAngles'); % load VID
+% 	load([PATH.vid   FILES{kk}],'lAngles','rAngles'); % load VID
 	%-----------------------------------------------------------------------------------------------------------------------------
   	% Check wing beat frequency %
-    wings.F = data(6,1:wings.daq.EI)';
-    if min(wings.F)<1.70
+    wings.F = data(1:wings.daq.EI,6);
+    if min(wings.F)<1.40
         disp(['Low WBF:  Fly ' num2str(Fly(kk)) ' Trial ' num2str(Trial(kk))])
         continue
     end
 	%-----------------------------------------------------------------------------------------------------------------------------
   	% Get wing data from DAQ %
    	Fc = 20; % cutoff frequency [Hz]
-    Fs = 1000; % sampling frequency [Hz]
+    Fs = 5000; % sampling frequency [Hz]
   	[b,a] = butter(2,Fc/(Fs/2)); % butterworth filter 
-    wings.daq.L = filtfilt(b,a,data(4,1:wings.daq.EI))'; % filter left wing
-    wings.daq.R = filtfilt(b,a,data(5,1:wings.daq.EI))'; % filter right wing
+    wings.daq.L = filtfilt(b,a,data(1:wings.daq.EI,4))'; % filter left wing
+    wings.daq.R = filtfilt(b,a,data(1:wings.daq.EI,5))'; % filter right wing
     wings.daq.wba = filtfilt(b,a,wings.daq.L - wings.daq.R); % filter L-R wing
     wings.daq.wba = wings.daq.wba - wings.daq.wba(1); % normalize
  	%-----------------------------------------------------------------------------------------------------------------------------
   	% Get wing data from vid %
-   	Fc = 20; % cutoff frequency [Hz]
-    Fs = 200; % sampling frequency [Hz]
-  	[b,a] = butter(2,Fc/(Fs/2)); % butterworth filter 
-    wings.vid.L = -1*lAngles(1:wings.vid.EI)';
-    wings.vid.R = -1*rAngles(1:wings.vid.EI)';
-    
-    % Hampel & low-pass filter L & R wings
-    X = linspace(1, length(wings.vid.L), length(wings.vid.L));
-    wings.vid.L = filtfilt(b,a,hampel(X, wings.vid.L, 50, 4));
-	wings.vid.R = filtfilt(b,a,hampel(X, wings.vid.R, 50, 4));
-
-    wings.vid.wba = filtfilt(b,a,wings.vid.L - wings.vid.R);
-   	wings.vid.wba = wings.vid.wba - wings.vid.wba(1);
+%    	Fc = 20; % cutoff frequency [Hz]
+%     Fs = 200; % sampling frequency [Hz]
+%   	[b,a] = butter(2,Fc/(Fs/2)); % butterworth filter 
+%     wings.vid.L = -1*lAngles(1:wings.vid.EI)';
+%     wings.vid.R = -1*rAngles(1:wings.vid.EI)';
+%     
+%     % Hampel & low-pass filter L & R wings
+%     X = linspace(1, length(wings.vid.L), length(wings.vid.L));
+%     wings.vid.L = filtfilt(b,a,hampel(X, wings.vid.L, 50, 4));
+% 	wings.vid.R = filtfilt(b,a,hampel(X, wings.vid.R, 50, 4));
+% 
+%     wings.vid.wba = filtfilt(b,a,wings.vid.L - wings.vid.R);
+%    	wings.vid.wba = wings.vid.wba - wings.vid.wba(1);
  	%-----------------------------------------------------------------------------------------------------------------------------
     % Store data in cells %
 	WINGS.daq.wba 	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = wings.daq.wba;
-	WINGS.vid.wba  	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = wings.vid.wba;
+% 	WINGS.vid.wba  	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = wings.vid.wba;
     %-----------------------------------------------------------------------------------------------------------------------------
     if showplot.Time
     figure (1) ; hold on ; box on
@@ -133,14 +133,14 @@ for kk = 1:nTrial
         elseif Vel(kk)<0
             plot(WINGS.daq.time,wings.daq.wba,'r')
         end
-    figure (2) ; hold on ; box on
-        xlabel('Time (s)')
-        ylabel('deg')
-        if Vel(kk)>0
-            plot(WINGS.vid.time,wings.vid.wba,'b')
-        elseif Vel(kk)<0
-            plot(WINGS.vid.time,wings.vid.wba,'r')
-        end
+%     figure (2) ; hold on ; box on
+%         xlabel('Time (s)')
+%         ylabel('deg')
+%         if Vel(kk)>0
+%             plot(WINGS.vid.time,wings.vid.wba,'b')
+%         elseif Vel(kk)<0
+%             plot(WINGS.vid.time,wings.vid.wba,'r')
+%         end
     end
     
     if showplot.Freq
@@ -209,101 +209,101 @@ WINGS.daq.GrandSTD.wba = std((cat(3,WINGS.daq.FlyMean.wba{:})),0,3);
 plot(WINGS.daq.time,0*WINGS.daq.time,'-g','LineWidth',1)
 %% VID Figure %%
 %---------------------------------------------------------------------------------------------------------------------------------    
-figure (5) ; clf ; hold on ; box on ; ylim([-50 50])
-xlabel('Time (s)')
-ylabel('deg')
-WINGS.vid.FlyMean = [];
-WINGS.vid.GrandMean = [];
-for kk = 1:nFly
-    for jj = 1:nVel
-        WINGS.vid.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.vid.wba{kk}{jj},2); % fly means
-        % plot all trials
-        if jj==1
-            h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
-        elseif jj==2
-            h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'b','LineWidth',1);
-        end
-        
-        for ii = 1:length(h)
-            h(ii).Color(4) = 0.1;
-        end
-    end
-    WINGS.vid.FlyMean.off{kk,1} = WINGS.vid.FlyMean.wba{kk,1}(:,1) + WINGS.vid.FlyMean.wba{kk,1}(:,2);
-end
-% plot fly means
-for kk = 1:nFly
-    h1 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
-    h2 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
-
-    h1.Color(4) = 0.3;
-    h2.Color(4) = 0.3;
-end
-
+% figure (5) ; clf ; hold on ; box on ; ylim([-50 50])
+% xlabel('Time (s)')
+% ylabel('deg')
+% WINGS.vid.FlyMean = [];
+% WINGS.vid.GrandMean = [];
 % for kk = 1:nFly
-% 	  plot(WINGS.vid.time,WINGS.vid.FlyMean.off{kk,1},'k','LineWidth',2)
+%     for jj = 1:nVel
+%         WINGS.vid.FlyMean.wba{kk,1}(:,jj) = mean(WINGS.vid.wba{kk}{jj},2); % fly means
+%         % plot all trials
+%         if jj==1
+%             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'r','LineWidth',1);
+%         elseif jj==2
+%             h = plot(WINGS.vid.time,WINGS.vid.wba{kk}{jj},'b','LineWidth',1);
+%         end
+%         
+%         for ii = 1:length(h)
+%             h(ii).Color(4) = 0.1;
+%         end
+%     end
+%     WINGS.vid.FlyMean.off{kk,1} = WINGS.vid.FlyMean.wba{kk,1}(:,1) + WINGS.vid.FlyMean.wba{kk,1}(:,2);
 % end
-
-% grand means
-WINGS.vid.GrandMean.off = mean(cat(3,WINGS.vid.FlyMean.off{:}),3);
-WINGS.vid.GrandMean.wba = mean((cat(3,WINGS.vid.FlyMean.wba{:})),3);
-% grand STD
-WINGS.vid.GrandSTD.off = std(cat(3,WINGS.vid.FlyMean.off{:}),0,3);
-WINGS.vid.GrandSTD.wba = std((cat(3,WINGS.vid.FlyMean.wba{:})),0,3);
-
-% plot grand means
-[~,~] = PlotPatch(WINGS.vid.GrandMean.wba(:,1),WINGS.vid.GrandSTD.wba(:,1),WINGS.vid.time,1,nFly,'r',[0.5 0.5 0.5],0.8,7);
-[~,~] = PlotPatch(WINGS.vid.GrandMean.wba(:,2),WINGS.vid.GrandSTD.wba(:,2),WINGS.vid.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
-[~,~] = PlotPatch(WINGS.vid.GrandMean.off,(WINGS.vid.GrandSTD.wba(:,1) + WINGS.vid.GrandSTD.wba(:,2)),WINGS.vid.time,1,nFly,...
-    'k',[0.5 0.5 0.5],0.8,8);
-plot(WINGS.vid.time,0*WINGS.vid.time,'-g','LineWidth',2)
-%% DAQ vs VID %%
-%---------------------------------------------------------------------------------------------------------------------------------    
-pp = 1;
-for kk = 1:nFly
-    for jj = 1:nVel
-        nn = length(WINGS.daq.wba{kk}{jj});
-        mm = length(WINGS.vid.wba{kk}{jj});
-        WINGS.daq.wbaRESMP{kk,1}{jj,1} = resample(WINGS.daq.wba{kk}{jj},mm,nn); % resampled daq WBA voltage
-        
-        figure (6) ; hold on ; xlabel('WBA(V)') ; ylabel('WBA(deg)') ; box on
-        ylim([-100 100])
-        xlim([-15 15])
-        for ii = 1:size(WINGS.daq.wbaRESMP{kk}{jj},2)
-            scatter(WINGS.daq.wbaRESMP{kk}{jj}(:,ii),WINGS.vid.wba{kk}{jj}(:,ii),'ob');
-            
-            WINGS.daq.ALL.wba{pp,1} = WINGS.daq.wbaRESMP{kk}{jj}(:,ii);
-            WINGS.vid.ALL.wba{pp,1} = WINGS.vid.wba{kk}{jj}(:,ii);
-        
-            pp = pp + 1;
-        end
-    end
-end
-lsline
-
-Xdata = cell2mat(WINGS.daq.ALL.wba);
-Ydata = cell2mat(WINGS.vid.ALL.wba);
-
-% Calculate linear best fit
-[~,m,b] = regression(WINGS.daq.ALL.wba,WINGS.vid.ALL.wba,'one');
-Xplot = linspace(-8,8,mm);
-Yplot = m*linspace(-8,8,mm) + b;
-
-% Scatter plot with fit
-figure (6); hold on
-    plot(Xplot,Yplot,'r','Linewidth',5)
-    axis([-10 10 -100 100])
-    box on
-    xlabel('WBA (V)')
-    ylabel('WBA (deg)')
-    title('LSQ Fit')
-
-% Scatter density plot with fit
-figure (7) ; clf ; hold on ; title('Scatter Density')
-    [~] = scatplot(Xdata,Ydata);
-    plot(Xplot,Yplot,'r','Linewidth',5)
-    colorbar
-    axis([-10 10 -100 100])
-    box on
-    xlabel('WBA (V)')
-    ylabel('WBA (deg)')
+% % plot fly means
+% for kk = 1:nFly
+%     h1 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,1),'r','LineWidth',3);
+%     h2 = plot(WINGS.vid.time,WINGS.vid.FlyMean.wba{kk,1}(:,2),'b','LineWidth',3);
+% 
+%     h1.Color(4) = 0.3;
+%     h2.Color(4) = 0.3;
+% end
+% 
+% % for kk = 1:nFly
+% % 	  plot(WINGS.vid.time,WINGS.vid.FlyMean.off{kk,1},'k','LineWidth',2)
+% % end
+% 
+% % grand means
+% WINGS.vid.GrandMean.off = mean(cat(3,WINGS.vid.FlyMean.off{:}),3);
+% WINGS.vid.GrandMean.wba = mean((cat(3,WINGS.vid.FlyMean.wba{:})),3);
+% % grand STD
+% WINGS.vid.GrandSTD.off = std(cat(3,WINGS.vid.FlyMean.off{:}),0,3);
+% WINGS.vid.GrandSTD.wba = std((cat(3,WINGS.vid.FlyMean.wba{:})),0,3);
+% 
+% % plot grand means
+% [~,~] = PlotPatch(WINGS.vid.GrandMean.wba(:,1),WINGS.vid.GrandSTD.wba(:,1),WINGS.vid.time,1,nFly,'r',[0.5 0.5 0.5],0.8,7);
+% [~,~] = PlotPatch(WINGS.vid.GrandMean.wba(:,2),WINGS.vid.GrandSTD.wba(:,2),WINGS.vid.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
+% [~,~] = PlotPatch(WINGS.vid.GrandMean.off,(WINGS.vid.GrandSTD.wba(:,1) + WINGS.vid.GrandSTD.wba(:,2)),WINGS.vid.time,1,nFly,...
+%     'k',[0.5 0.5 0.5],0.8,8);
+% plot(WINGS.vid.time,0*WINGS.vid.time,'-g','LineWidth',2)
+% %% DAQ vs VID %%
+% %---------------------------------------------------------------------------------------------------------------------------------    
+% pp = 1;
+% for kk = 1:nFly
+%     for jj = 1:nVel
+%         nn = length(WINGS.daq.wba{kk}{jj});
+%         mm = length(WINGS.vid.wba{kk}{jj});
+%         WINGS.daq.wbaRESMP{kk,1}{jj,1} = resample(WINGS.daq.wba{kk}{jj},mm,nn); % resampled daq WBA voltage
+%         
+%         figure (6) ; hold on ; xlabel('WBA(V)') ; ylabel('WBA(deg)') ; box on
+%         ylim([-100 100])
+%         xlim([-15 15])
+%         for ii = 1:size(WINGS.daq.wbaRESMP{kk}{jj},2)
+%             scatter(WINGS.daq.wbaRESMP{kk}{jj}(:,ii),WINGS.vid.wba{kk}{jj}(:,ii),'ob');
+%             
+%             WINGS.daq.ALL.wba{pp,1} = WINGS.daq.wbaRESMP{kk}{jj}(:,ii);
+%             WINGS.vid.ALL.wba{pp,1} = WINGS.vid.wba{kk}{jj}(:,ii);
+%         
+%             pp = pp + 1;
+%         end
+%     end
+% end
+% lsline
+% 
+% Xdata = cell2mat(WINGS.daq.ALL.wba);
+% Ydata = cell2mat(WINGS.vid.ALL.wba);
+% 
+% % Calculate linear best fit
+% [~,m,b] = regression(WINGS.daq.ALL.wba,WINGS.vid.ALL.wba,'one');
+% Xplot = linspace(-8,8,mm);
+% Yplot = m*linspace(-8,8,mm) + b;
+% 
+% % Scatter plot with fit
+% figure (6); hold on
+%     plot(Xplot,Yplot,'r','Linewidth',5)
+%     axis([-10 10 -100 100])
+%     box on
+%     xlabel('WBA (V)')
+%     ylabel('WBA (deg)')
+%     title('LSQ Fit')
+% 
+% % Scatter density plot with fit
+% figure (7) ; clf ; hold on ; title('Scatter Density')
+%     [~] = scatplot(Xdata,Ydata);
+%     plot(Xplot,Yplot,'r','Linewidth',5)
+%     colorbar
+%     axis([-10 10 -100 100])
+%     box on
+%     xlabel('WBA (V)')
+%     ylabel('WBA (deg)')
 end
