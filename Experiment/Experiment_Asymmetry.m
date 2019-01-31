@@ -15,7 +15,7 @@ viddir = [rootdir '\Vid\'];
 n_tracktime = 10;           % length(func)/fps; seconds for each EXPERIMENT
 n_resttime = 5;             % seconds for each REST
 n_pause = 0.2;              % seconds for each pause between panel commands
-n_trial = 20;               % # trials per fly
+n_trial = 30;               % # trials per fly
 n_AI = 6;                   % # of analog input channels
 
 %% Set up data acquisition on NiDAQ (session mode) %%
@@ -109,7 +109,7 @@ Rdir = [1 1 -1 1 -1 1 -1 -1 1 -1 ];
 Rdir = [Rdir,Rdir,Rdir];
 %% EXPERIMENT LOOP %%
 %---------------------------------------------------------------------------------------------------------------------------------
-for ii = 1:30      
+for ii = 1:n_trial      
     disp('Trial')
     disp(num2str(ii));   % print counter to command line
     preview(vid);       % open video preview window
