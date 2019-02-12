@@ -286,29 +286,29 @@ lsline
 Xdata = cell2mat(WINGS.daq.ALL.wba);
 Ydata = cell2mat(WINGS.vid.ALL.wba);
 
-% Calculate linear best fit
-[~,m,b] = regression(WINGS.daq.ALL.wba,WINGS.vid.ALL.wba,'one');
-Xplot = linspace(-8,8,mm);
-Yplot = m*linspace(-8,8,mm) + b;
-
-% Scatter plot with fit
-figure (6); hold on
-    plot(Xplot,Yplot,'r','Linewidth',5)
-    axis([-10 10 -100 100])
-    box on
-    xlabel('WBA (V)')
-    ylabel('WBA (deg)')
-    title('LSQ Fit')
-
-% Scatter density plot with fit
-figure (7) ; clf ; hold on ; title('Scatter Density')
-    [~] = scatplot(Xdata,Ydata);
-    plot(Xplot,Yplot,'r','Linewidth',5)
-    colorbar
-    axis([-10 10 -100 100])
-    box on
-    xlabel('WBA (V)')
-    ylabel('WBA (deg)')
+% % Calculate linear best fit
+% [~,m,b] = regression(WINGS.daq.ALL.wba,WINGS.vid.ALL.wba,'one');
+% Xplot = linspace(-8,8,mm);
+% Yplot = m*linspace(-8,8,mm) + b;
+% 
+% % Scatter plot with fit
+% figure (6); hold on
+%     plot(Xplot,Yplot,'r','Linewidth',5)
+%     axis([-10 10 -100 100])
+%     box on
+%     xlabel('WBA (V)')
+%     ylabel('WBA (deg)')
+%     title('LSQ Fit')
+% 
+% % Scatter density plot with fit
+% figure (7) ; clf ; hold on ; title('Scatter Density')
+%     [~] = scatplot(Xdata,Ydata);
+%     plot(Xplot,Yplot,'r','Linewidth',5)
+%     colorbar
+%     axis([-10 10 -100 100])
+%     box on
+%     xlabel('WBA (V)')
+%     ylabel('WBA (deg)')
     
  %% Statistics on Individuals %%
 %  for kk = 1:nFly
@@ -325,16 +325,19 @@ xlim([-3, 3])
 line([0,0],[0 4], 'Color','k')
 box off
 
-[h, p] = ttest(mean_off_daq, 0, 'tail', 'right'); % test if individuals are > 0 V
+[h, p] = ttest(mean_off_daq, 0, 'tail', 'both'); % test if individuals are > 0 V
 
 % VID
-mean_off_vid = cellfun(@mean, WINGS.vid.FlyMean.off); % get all means for sum
-figure (9); histogram(mean_off_vid,10)
-xlim([-3, 3])
-line([0,0],[0 4], 'Color','k')
-box off
+% mean_off_vid = cellfun(@mean, WINGS.vid.FlyMean.off); % get all means for sum
+% figure (9); histogram(mean_off_vid,10)
+% xlim([-3, 3])
+% line([0,0],[0 4], 'Color','k')
+% box off
+% 
+% [h, p] = ttest(mean_off_vid, 0, 'tail', 'right'); % test if individuals are > 0 V
 
-[h, p] = ttest(mean_off_vid, 0, 'tail', 'right'); % test if individuals are > 0 V
+
+
  
 %---------------------------------------------------------------------------------------------------------------------------------     
 end
