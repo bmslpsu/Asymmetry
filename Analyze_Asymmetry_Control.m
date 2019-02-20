@@ -16,10 +16,12 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 % root = 'H:\Experiment_Asymmetry_Control\HighContrast\';
 root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\InterpolatedMotion';
+%root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\HighContrast';
 %root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\LowContrast';
 % Select VIDEO angle files & set DAQ file directory
 [FILES, PATH] = uigetfile({'*.mat', 'DAQ-files'}, 'Select DAQ files', root, 'MultiSelect','on');
 FILES = FILES';
+TrialCount = [];
 %% Process File Data %%
 %---------------------------------------------------------------------------------------------------------------------------------
 temp = textscan(PATH, '%s', 'delimiter','\'); % get spatial frequency (0 = Random)
@@ -107,12 +109,13 @@ for kk = 1:nTrial
     end
 	%-----------------------------------------------------------------------------------------------------------------------------
   	% Get wing data from DAQ %
-   	Fc = 20; % cutoff frequency [Hz]
+   	Fc = 25; % cutoff frequency [Hz]
     Fs = 1000; % sampling frequency [Hz]
   	[b,a] = butter(2,Fc/(Fs/2)); % butterworth filter 
     wings.daq.L = filtfilt(b,a,WBAdata(4,1:wings.daq.EI))'; % filter left wing
     wings.daq.R = filtfilt(b,a,WBAdata(5,1:wings.daq.EI))'; % filter right wing
-    wings.daq.wba = filtfilt(b,a,wings.daq.L - wings.daq.R); % filter L-R wing
+    %wings.daq.wba = filtfilt(b,a,wings.daq.L - wings.daq.R); % filter L-R wing
+    wings.daq.wba = wings.daq.L - wings.daq.R;
     wings.daq.wba = wings.daq.wba - wings.daq.wba(1); % normalize
  	%-----------------------------------------------------------------------------------------------------------------------------
     % Store data in cells %
@@ -151,13 +154,17 @@ for kk = 1:nFly
     WINGS.daq.FlyMean.wba{kk,1} = cellfun(@(x) mean(x,2),WINGS.daq.wba{kk},'UniformOutput',false);
 end
 
+% count number of trials
+
 for kk = 1:nFly
     for jj = 1:nVel
         for ii = 1:nDir
-            WINGS.daq.FlyMeanVel.wba{jj,ii}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,ii}; % temp to store fly mean data until mean is taken            
+            WINGS.daq.FlyMeanVel.wba{jj,ii}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,ii}; % temp to store fly mean data until mean is taken
+            TrialCount = [TrialCount; kk jj ii size(WINGS.daq.wba{kk}{jj,ii},2)];
+            
         end
-        WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1}(1:1001) + WINGS.daq.FlyMean.wba{kk,1}{jj,2}(1:1001);
-        %WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1} + WINGS.daq.FlyMean.wba{kk,1}{jj,2};
+        %WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1}(1:1001) + WINGS.daq.FlyMean.wba{kk,1}{jj,2}(1:1001);
+        WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1} + WINGS.daq.FlyMean.wba{kk,1}{jj,2};
     end
 end
 
@@ -329,9 +336,20 @@ for jj = 1:size(ydata,2)
     
 end
 
+% Individual trials per speed
+ani = TrialCount(:,1);
+speed = TrialCount(:,2);
+dir = TrialCount(:,3);
+tcount = TrialCount(:,4);
 
 
 
+F = figure (7); 
+set(F, 'Renderer', 'painters', 'Units','inch', 'Position', [1,1, 8.5, 8.5]);
+subplot(subRows, 1, subCurrent)
+boxplot(tcount, {ani speed dir},'labels', {ani speed dir}, 'plotstyle','compact');
+box off
+ylim([0.8,6.2])
     
     
 %set(gca, 'XTickLabel',[])
