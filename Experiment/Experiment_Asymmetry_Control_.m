@@ -14,7 +14,6 @@ imaqreset
 %---------------------------------------------------------------------------------------------------------------------------------
 rootdir = ['D:\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
 viddir = [rootdir 'Vid\'];
-
 % spatFreqFolder = ['E:\Experiment_Asymmetry_Control_V2\LowContrast' num2str(spatFreq)];
 % spatFreqFolder = ['E:\Experiment_Asymmetry_Control_V2\InterpolatedMotion' num2str(spatFreq)];
 % validSpatFreq = 7.5*[3,4,8];
@@ -36,8 +35,8 @@ switch spatFreq
 end
 %% EXPERIMENTAL PARAMETERS %%
 %---------------------------------------------------------------------------------------------------------------------------------
-n_tracktime = 10;  	% seconds for each EXPERIMENT
-n_resttime = 2;    	% seconds for each REST
+n_tracktime = 11;  	% seconds for each EXPERIMENT
+n_resttime = 5;    	% seconds for each REST
 n_pause = 0.2;      % pause between commands
 n_AI = 6;        	% # of analog input channels
 n_rep = 5;          % number of cycles through velocities for each fly
@@ -55,60 +54,13 @@ addAnalogInputChannel(s,devices.ID, 1:n_AI, 'Voltage'); % Add Analog Input Chann
     % AI5 = R: right wing beat amplitude
     % AI6 = FREQ: frequency
     
-% Add analog output channels
-ch.AO = addAnalogOutputChannel(s,devices.ID,'ao0','Voltage');
-ch.AO.Name = 'Trigger';
-
 % Set Sampling Rate
-s.Rate = 5000;                   % samples per second
-s.IsContinuous = false;          % continuous data collection until stopped
-% s.DurationInSeconds = 10;
-
-% Setup Sampling
-s.Rate = 5000; % samples per second
-s.IsContinuous = false;	% continuous data collection until stopped
-
-
-FrameRate = 200; % camera frame rate
-nFrame = FrameRate * n_tracktime; % # of frames to log
-
-t = 0:1/s.Rate:n_tracktime;
-TriggerSignal = (square(2*pi*FrameRate*t,90) + 1)';
-
+s.Rate = 1000;                  % samples per second
+s.IsContinuous = true;          % continuous data collection until stopped
 disp('DAQ Setup Done...')
 %% SETUP CAMERA INPUT %%
 %---------------------------------------------------------------------------------------------------------------------------------
-adaptorName = 'gige';
-deviceID = 1;
-vidFormat = 'Mono8';
-vid = videoinput(adaptorName, deviceID, vidFormat);
-
-% Configure vidobj properties.
-set(vid, 'ErrorFcn', @imaqcallback);
-set(vid, 'LoggingMode', 'memory');
-set(vid,'FrameGrabInterval',1);
-ROI.x = 500;
-ROI.y = 250;
-ROI.xoff = (round(659 - ROI.x)/2);
-ROI.yoff = (round(494 - ROI.y)/2);
-vid.ROIPosition = [ROI.xoff ROI.yoff ROI.x ROI.y];
-set(vid, 'FramesPerTrigger', 1); % frames to log for each trigger
-vid.TriggerRepeat = nFrame-1; % # triggers
-
-% Configure vidobj source properties.
-srcObj1 = get(vid, 'Source');
-srcObj1.Gamma = 0.386367797851563;
-srcObj1.GainRaw = 964;
-srcObj1.ExposureTimeAbs = 4000; % 200 Hz frame rate
-% srcObj1(1).ExposureMode = 'Timed'; % exposure time controlled by pulse width
-
-% Trigger config
-triggerconfig(vid, 'hardware','DeviceSpecific','DeviceSpecific')
-set(srcObj1(1),'LineSelector','Line1');
-set(srcObj1(1),'TriggerActivation','RisingEdge');
-set(srcObj1(1),'TriggerMode','on');
-set(srcObj1(1),'TriggerSelector','FrameStart');
-
+[vid] = RigidFlyCamSettingsBC_acA640_120gm_V1();
 disp('VID Setup Done...')
 %% Set Variable to Control Pattern Velocity %%
 %---------------------------------------------------------------------------------------------------------------------------------
@@ -127,8 +79,7 @@ for kk = 1:n_rep*nVel
     disp('-------------------------------------------------------')
     gain = Gain_rand(kk);               % gain corresponding to velocity for trial
     disp(['Trial:  ' num2str(kk)])      % prints counter to command line
-   	preview(vid);       % open video preview window
-	start(vid)          % start video buffer
+    preview(vid);
     %-----------------------------------------------------------------------------------------------------------------------------
     % CLOSED LOOP BAR TRACKING
     disp('rest');
@@ -147,48 +98,39 @@ for kk = 1:n_rep*nVel
     pause(1)
     disp(['move ground ' num2str(gain)])
     Panel_com('stop');pause(n_pause);
-    Panel_com('set_pattern_id', patID);pause(n_pause)               % pattern = 
+    Panel_com('set_pattern_id', patID);pause(n_pause)               % pattern = (Pattern_spatFreq_22_30_60 or Pattern_Random_Ground_48)
     Panel_com('set_position',[1, posY]);pause(n_pause)              % set starting position (xpos,ypos) [ypos = spatFreq]
     Panel_com('set_funcX_freq', 50);pause(n_pause);                 % default X update rate
     Panel_com('set_funcY_freq', 50);pause(n_pause);                 % default Y update rate
     Panel_com('set_mode', [0,0]);pause(n_pause)                     % 0=open,1=closed,2=fgen,3=vmode,4=pmode
-    Panel_com('send_gain_bias',[gain,0,0,0]);pause(n_pause)         % open-loop
+    Panel_com('send_gain_bias',[gain,0,0,0]);pause(n_pause)  	% open-loop
     %-----------------------------------------------------------------------------------------------------------------------------
     % RUN EXPERIMENT AND COLLECT DATA
-    queueOutputData(s,TriggerSignal) % set trigger AO signal
+    % Open log file and start data aquisition
+    fid1 = fopen('log.bin','w');
+    lh = addlistener(s,'DataAvailable',@(src, event)logData(src, event, fid1));
+    startBackground(s); % start data collection for WBA 
     Panel_com('start')  % run trial
-    [data,time] = s.startForeground;
-	stop(vid) % stop video buffer
+    pause(n_tracktime)
     Panel_com('stop')
+    s.stop; % stop data colection
+    delete(lh); fclose(fid1); % reset data aquisition
     %-----------------------------------------------------------------------------------------------------------------------------
     % GET DATA AND SAVE TO .mat FILE
+    [raw_data,~]    = fread(fopen('log.bin','r'),[n_AI+1,inf],'double');   % get DAQ data
     % Create named structure array to store data
-	[vidData,t_v] = getdata(vid, vid.FramesAcquired); % get video data
-    dataDAQ.Time    = time;
-    dataDAQ.Trig    = data(1,:)';
-    dataDAQ.Xpos    = data(2,:)';
-    dataDAQ.Ypos    = data(3,:)';
-    dataDAQ.LWing   = data(4,:)';
-    dataDAQ.RWing   = data(5,:)';
-    dataDAQ.WBF     = data(6,:)';
-      
-    % CLOSED LOOP BAR TRACKING
-    disp('rest');
-    Panel_com('stop'); pause(n_pause)
-    Panel_com('set_pattern_id', 1);pause(n_pause)               % set pattern to "Pattern_Fourier_bar_barwidth=8"
-    Panel_com('set_position',[1, 1]); pause(n_pause)            % set start position (xpos,ypos)
-    Panel_com('set_mode',[1,0]); pause(n_pause)                 % 0=open,1=closed,2=fgen,3=vmode,4=pmode)
-    Panel_com('set_funcX_freq', 50); pause(n_pause)             % default X update rate
-	Panel_com('set_funcY_freq', 50); pause(n_pause)           	% default Y update rate
-    Panel_com('send_gain_bias',[-15,0,0,0]); pause(n_pause)     % [xgain,xoffset,ygain,yoffset]
-    Panel_com('start');                                         % start closed-loop tracking
-    
+    dataDAQ.Time    = raw_data(1,:)';
+    dataDAQ.Trig    = raw_data(2,:)';
+    dataDAQ.Xpos    = raw_data(3,:)';
+    dataDAQ.Ypos    = raw_data(4,:)';
+    dataDAQ.LWing   = raw_data(5,:)';
+    dataDAQ.RWing   = raw_data(6,:)';
+    dataDAQ.WBF     = raw_data(7,:)';
     % Save data
     disp('Saving...')
+    
     save([rootdir 'Fly_' num2str(Fn) '_Trial_' num2str(kk) '_Vel_' num2str(3.75*Gain_rand(kk)) '_SpatFreq_' ...
         num2str(spatFreq) '.mat'],'-v7.3','dataDAQ');
-    save([viddir 'Fly_' num2str(Fn) '_Trial_' num2str(kk) '_Vel_' num2str(3.75*Gain_rand(kk)) '_SpatFreq_' ...
-        num2str(spatFreq) '.mat'],'-v7.3','vidData','t_v');
     %-----------------------------------------------------------------------------------------------------------------------------
 end
 toc
