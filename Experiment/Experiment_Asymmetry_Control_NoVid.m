@@ -12,7 +12,8 @@ daqreset
 imaqreset
 %% Set Directories & Controller Parameters %%
 %---------------------------------------------------------------------------------------------------------------------------------
-spatFreqFolder = ['D:\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
+rootdir = ['D:\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
+viddir = [rootdir 'Vid\'];
 % spatFreqFolder = ['E:\Experiment_Asymmetry_Control_V2\LowContrast' num2str(spatFreq)];
 % spatFreqFolder = ['E:\Experiment_Asymmetry_Control_V2\InterpolatedMotion' num2str(spatFreq)];
 % validSpatFreq = 7.5*[3,4,8];
@@ -34,7 +35,7 @@ switch spatFreq
 end
 %% EXPERIMENTAL PARAMETERS %%
 %---------------------------------------------------------------------------------------------------------------------------------
-n_tracktime = 10;  	% seconds for each EXPERIMENT
+n_tracktime = 11;  	% seconds for each EXPERIMENT
 n_resttime = 5;    	% seconds for each REST
 n_pause = 0.2;      % pause between commands
 n_AI = 6;        	% # of analog input channels
@@ -55,8 +56,7 @@ addAnalogInputChannel(s,devices.ID, 1:n_AI, 'Voltage'); % Add Analog Input Chann
     
 % Set Sampling Rate
 s.Rate = 1000;                  % samples per second
-s.IsContinuous = false;          % continuous data collection until stopped
-s.DurationInSeconds = 10;
+s.IsContinuous = true;          % continuous data collection until stopped
 disp('DAQ Setup Done...')
 %% SETUP CAMERA INPUT %%
 %---------------------------------------------------------------------------------------------------------------------------------
@@ -107,30 +107,29 @@ for kk = 1:n_rep*nVel
     %-----------------------------------------------------------------------------------------------------------------------------
     % RUN EXPERIMENT AND COLLECT DATA
     % Open log file and start data aquisition
-%     fid1 = fopen('log.bin','w');
-%     lh = addlistener(s,'DataAvailable',@(src, event)logData(src, event, fid1));
-%     startBackground(s); % start data collection for WBA 
+    fid1 = fopen('log.bin','w');
+    lh = addlistener(s,'DataAvailable',@(src, event)logData(src, event, fid1));
+    startBackground(s); % start data collection for WBA 
     Panel_com('start')  % run trial
-    [raw_data,time] = s.startForeground;
-%     pause(n_tracktime)
+    pause(n_tracktime)
     Panel_com('stop')
     s.stop; % stop data colection
-%     delete(lh); fclose(fid1); % reset data aquisition
+    delete(lh); fclose(fid1); % reset data aquisition
     %-----------------------------------------------------------------------------------------------------------------------------
     % GET DATA AND SAVE TO .mat FILE
-%     [raw_data,~]    = fread(fopen('log.bin','r'),[n_AI+1,inf],'double');   % get DAQ data
+    [raw_data,~]    = fread(fopen('log.bin','r'),[n_AI+1,inf],'double');   % get DAQ data
     % Create named structure array to store data
-    dataDAQ.Time    = time;
-    dataDAQ.Trig    = raw_data(1,:)';
-    dataDAQ.Xpos    = raw_data(2,:)';
-    dataDAQ.Ypos    = raw_data(3,:)';
-    dataDAQ.LWing   = raw_data(4,:)';
-    dataDAQ.RWing   = raw_data(5,:)';
-    dataDAQ.WBF     = raw_data(6,:)';
+    dataDAQ.Time    = raw_data(1,:)';
+    dataDAQ.Trig    = raw_data(2,:)';
+    dataDAQ.Xpos    = raw_data(3,:)';
+    dataDAQ.Ypos    = raw_data(4,:)';
+    dataDAQ.LWing   = raw_data(5,:)';
+    dataDAQ.RWing   = raw_data(6,:)';
+    dataDAQ.WBF     = raw_data(7,:)';
     % Save data
     disp('Saving...')
     
-    save([spatFreqFolder 'fly_' num2str(Fn) '_trial_' num2str(kk) '_Vel_' num2str(3.75*Gain_rand(kk)) '_SpatFreq_' ...
+    save([rootdir 'Fly_' num2str(Fn) '_Trial_' num2str(kk) '_Vel_' num2str(3.75*Gain_rand(kk)) '_SpatFreq_' ...
         num2str(spatFreq) '.mat'],'-v7.3','dataDAQ');
     %-----------------------------------------------------------------------------------------------------------------------------
 end
