@@ -12,7 +12,7 @@ daqreset
 imaqreset
 %% Set Directories & Controller Parameters %%
 %---------------------------------------------------------------------------------------------------------------------------------
-rootdir = ['D:\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
+rootdir = ['D:\Experiment_Asymmetry_Control\HighContrast\' num2str(spatFreq) '\'];
 viddir = [rootdir 'Vid\'];
 
 % spatFreqFolder = ['E:\Experiment_Asymmetry_Control_V2\LowContrast' num2str(spatFreq)];
@@ -157,20 +157,13 @@ for kk = 1:n_rep*nVel
     % RUN EXPERIMENT AND COLLECT DATA
     queueOutputData(s,TriggerSignal) % set trigger AO signal
     Panel_com('start')  % run trial
-    [data,time] = s.startForeground;
+    [data,t_p] = s.startForeground;
 	stop(vid) % stop video buffer
     Panel_com('stop')
     %-----------------------------------------------------------------------------------------------------------------------------
     % GET DATA AND SAVE TO .mat FILE
     % Create named structure array to store data
 	[vidData,t_v] = getdata(vid, vid.FramesAcquired); % get video data
-    dataDAQ.Time    = time;
-    dataDAQ.Trig    = data(1,:)';
-    dataDAQ.Xpos    = data(2,:)';
-    dataDAQ.Ypos    = data(3,:)';
-    dataDAQ.LWing   = data(4,:)';
-    dataDAQ.RWing   = data(5,:)';
-    dataDAQ.WBF     = data(6,:)';
       
     % CLOSED LOOP BAR TRACKING
     disp('rest');
@@ -186,7 +179,7 @@ for kk = 1:n_rep*nVel
     % Save data
     disp('Saving...')
     save([rootdir 'Fly_' num2str(Fn) '_Trial_' num2str(kk) '_Vel_' num2str(3.75*Gain_rand(kk)) '_SpatFreq_' ...
-        num2str(spatFreq) '.mat'],'-v7.3','dataDAQ');
+        num2str(spatFreq) '.mat'],'-v7.3','data','t_p');
     save([viddir 'Fly_' num2str(Fn) '_Trial_' num2str(kk) '_Vel_' num2str(3.75*Gain_rand(kk)) '_SpatFreq_' ...
         num2str(spatFreq) '.mat'],'-v7.3','vidData','t_v');
     %-----------------------------------------------------------------------------------------------------------------------------
