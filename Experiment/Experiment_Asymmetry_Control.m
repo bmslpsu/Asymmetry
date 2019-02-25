@@ -12,11 +12,8 @@ daqreset
 imaqreset
 %% Set Directories & Controller Parameters %%
 %---------------------------------------------------------------------------------------------------------------------------------
-rootdir = ['D:\Experiment_Asymmetry_Control\HighContrast\' num2str(spatFreq) '\'];
+rootdir = ['D:\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
 viddir = [rootdir 'Vid\'];
-
-% spatFreqFolder = ['E:\Experiment_Asymmetry_Control_V2\LowContrast' num2str(spatFreq)];
-% spatFreqFolder = ['E:\Experiment_Asymmetry_Control_V2\InterpolatedMotion' num2str(spatFreq)];
 % validSpatFreq = 7.5*[3,4,8];
 switch spatFreq
     case 0
