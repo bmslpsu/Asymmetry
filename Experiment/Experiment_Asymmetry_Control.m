@@ -120,7 +120,7 @@ Gain_rand = Gain_all(randperm(size(Gain_all,1)),:); % reshuffle randomly
 %% START EXPERIMENT AND DATA COLLECTION %%
 %---------------------------------------------------------------------------------------------------------------------------------
 tic
-for kk = 1:n_rep*nVel
+for kk = 37:n_rep*nVel
     disp('-------------------------------------------------------')
     gain = Gain_rand(kk);               % gain corresponding to velocity for trial
     disp(['Trial:  ' num2str(kk)])      % prints counter to command line
