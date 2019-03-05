@@ -124,7 +124,7 @@ switch po
         end %if
         hs = gsp(x,y,ddf,ms);
         out.hs = hs;
-        colorbar
+        out.cb = colorbar;
     case {3,4}
         if po>3
             [c,h] = contour(xi,yi,zi);
@@ -132,7 +132,7 @@ switch po
         end %if
         hs = gsp(x,y,dd,ms);
         out.hs = hs;
-        colorbar    
+        out.cb = colorbar;
 end %switch
 %------Relocate variables and place NaN's ----------
 dd(idat) = dd;
