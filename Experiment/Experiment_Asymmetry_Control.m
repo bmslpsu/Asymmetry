@@ -12,7 +12,7 @@ daqreset
 imaqreset
 %% Set Directories & Controller Parameters %%
 %---------------------------------------------------------------------------------------------------------------------------------
-rootdir = ['D:\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
+rootdir = ['D:\EXPERIMENTS\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
 viddir = [rootdir 'Vid\'];
 % validSpatFreq = 7.5*[3,4,8];
 switch spatFreq
@@ -37,7 +37,7 @@ n_tracktime = 10;  	% seconds for each EXPERIMENT
 n_resttime = 2;    	% seconds for each REST
 n_pause = 0.2;      % pause between commands
 n_AI = 6;        	% # of analog input channels
-n_rep = 5;          % number of cycles through velocities for each fly
+n_rep = 6;          % number of cycles through velocities for each fly
 
 %% SETUP DATA AQUISITION: NiDAQ (session mode)
 %---------------------------------------------------------------------------------------------------------------------------------
@@ -114,18 +114,21 @@ Speed = (30:30:150)'; % [deg/s] speed
 Vel = [Speed;-Speed]; % [deg/s] CW & CCW speeds
 nVel = length(Vel);   % # of velocities
 Gain = Vel/3.75;      % Gains corresponding to each velocity
-Gain_all = repmat(Gain,n_rep,1); % repeat gains for n_rep
-Gain_rand = Gain_all(randperm(size(Gain_all,1)),:); % reshuffle randomly
+Gain_all = Gain(randperm(size(Gain,1)),:); % reshuffle randomly
+Gain_rand = repmat(Gain_all,n_rep,1); % repeat gains for n_rep
+
+% Gain_all = repmat(Gain,n_rep,1); % repeat gains for n_rep
+% Gain_rand = Gain_all(randperm(size(Gain_all,1)),:); % reshuffle randomly
 
 %% START EXPERIMENT AND DATA COLLECTION %%
 %---------------------------------------------------------------------------------------------------------------------------------
 tic
-for kk = 37:n_rep*nVel
+for kk = 1:n_rep*nVel
     disp('-------------------------------------------------------')
-    gain = Gain_rand(kk);               % gain corresponding to velocity for trial
-    disp(['Trial:  ' num2str(kk)])      % prints counter to command line
-   	preview(vid);       % open video preview window
-	start(vid)          % start video buffer
+    gain = Gain_rand(kk); % gain corresponding to velocity for trial
+    disp(['Trial:  ' num2str(kk)]) % prints counter to command line
+   	preview(vid); % open video preview window
+	start(vid) % start video buffer
     %-----------------------------------------------------------------------------------------------------------------------------
     % CLOSED LOOP BAR TRACKING
     disp('rest');
