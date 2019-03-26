@@ -3,7 +3,7 @@ function [] = Analyze_Asymmetry_Control(subRows,subCurrent)
 % Analyze_Asymmetry_Control: calculates WBA in response to CW & CCW ramps, compares DAQ & VIDEO measurments
 %   INPUTS:
 %       subRows     : # of subplot rows for the main figure (set=1 if only looking at one data set)
-%       subCurrent  : row # fo specific data set
+%       subCurrent  : row # for specific data set
 %   OUTPUTS:
 %
 %---------------------------------------------------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
 % root = 'H:\Experiment_Asymmetry_Control\HighContrast\';
-root = 'H:\Experiment_Asymmetry_Control\LowContrast\';
+root = 'H:\EXPERIMENTS\Experiment_Asymmetry_Control\HighContrast\';
 % Select VIDEO angle files & set DAQ file directory
 [FILES, PATH] = uigetfile({'*.mat', 'DAQ-files'}, 'Select DAQ files', root, 'MultiSelect','on');
 FILES = FILES';
