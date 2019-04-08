@@ -15,8 +15,8 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
 % root = 'H:\Experiment_Asymmetry_Control\HighContrast\';
-root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\InterpolatedMotion';
-%root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\HighContrast';
+%root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\InterpolatedMotion';
+root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\HighContrast';
 %root = 'C:\JMM\Rigid_data\Experiment_Asymmetry_Control\LowContrast';
 % Select VIDEO angle files & set DAQ file directory
 [FILES, PATH] = uigetfile({'*.mat', 'DAQ-files'}, 'Select DAQ files', root, 'MultiSelect','on');
@@ -163,8 +163,8 @@ for kk = 1:nFly
             TrialCount = [TrialCount; kk jj ii size(WINGS.daq.wba{kk}{jj,ii},2)];
             
         end
-        %WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1}(1:1001) + WINGS.daq.FlyMean.wba{kk,1}{jj,2}(1:1001);
-        WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1} + WINGS.daq.FlyMean.wba{kk,1}{jj,2};
+        %WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1}(1:1001) + WINGS.daq.FlyMean.wba{kk,1}{jj,2}(1:1001);        
+        WINGS.daq.FlyMeanVel.wba{jj,3}(:,kk) = WINGS.daq.FlyMean.wba{kk,1}{jj,1} + WINGS.daq.FlyMean.wba{kk,1}{jj,2};           
     end
 end
 
@@ -257,19 +257,21 @@ for jj = 1:nVel
             xticklabels('')
         end
                 
-        xlim([-7 7])
+        %xlim([-8 8])
         %xticks([-4 -3 -2 -1 0 1 2 3 4])
         %ylim([0 4])
         %yticks([0 4])
         
-        histogram(mean_off_daq{jj,3},10)
-        xlim([-8, 8])
-        ylim([0, 6])
-        line([0,0],[0 4], 'Color','m')
+        histogram(mean_off_daq{jj,3}, 10, 'BinWidth',1, 'Normalization', 'probability')
+        xlim([-12, 12])
+        ylim([0, 0.5])
+        yticklabels([0 0.5])
+        yticks([0 0.5])
+        line([0,0],[0 1], 'Color','m')
         
         [h, p] = ttest(mean_off_daq{jj,3}, 0); % test if individuals are > 0 V 
         S = skewness(mean_off_daq{jj,3});
-        text(-4.5, 5.5, ['p = ', num2str(round(p,3))]);
+        text(-4.5, 0.4, ['p = ', num2str(round(p,3))]);
         %text(-4.5, 4.5, ['s = ', num2str(round(S,3))]);
    
     box off
@@ -324,14 +326,14 @@ xticks(1:1:nFly)
 xticklabels([])
 xlim([0 nFly+1])
 
-ylim([-5 5])
+ylim([-10 10])
 
 % asymmetry index
 for jj = 1:size(ydata,2)
     
     [~, Pval] = ttest(ydata(:,jj));
     if Pval <= 0.05
-        scatter(xdata(1,jj), 5, '*k')
+        scatter(xdata(1,jj), 10, '*k')
     end
     
 end
@@ -349,7 +351,7 @@ set(F, 'Renderer', 'painters', 'Units','inch', 'Position', [1,1, 8.5, 8.5]);
 subplot(subRows, 1, subCurrent)
 boxplot(tcount, {ani speed dir},'labels', {ani speed dir}, 'plotstyle','compact');
 box off
-ylim([0.8,6.2])
+ylim([-10,10])
     
     
 %set(gca, 'XTickLabel',[])
