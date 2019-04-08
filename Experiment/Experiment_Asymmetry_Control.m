@@ -12,21 +12,21 @@ daqreset
 imaqreset
 %% Set Directories & Controller Parameters %%
 %---------------------------------------------------------------------------------------------------------------------------------
-rootdir = ['D:\EXPERIMENTS\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
+rootdir = ['D:\EXPERIMENTS\Experiment_Asymmetry_Control_Verification\LowContrast\' num2str(spatFreq) '\'];
 viddir = [rootdir 'Vid\'];
 % validSpatFreq = 7.5*[3,4,8];
 switch spatFreq
     case 0
-        patID = 6;
+        patID = 5;
         posY  = 1;
     case 22.5
-        patID = 8;
+        patID = 7;
         posY  = 3;
     case 30
-        patID = 8;
+        patID = 7;
         posY  = 4;
     case 60
-        patID = 8;
+        patID = 7;
         posY  = 6;
     otherwise
         error('Invalid Spatial Frequency!!')
@@ -115,6 +115,7 @@ Vel = [Speed;-Speed]; % [deg/s] CW & CCW speeds
 nVel = length(Vel);   % # of velocities
 Gain = Vel/3.75;      % Gains corresponding to each velocity
 Gain_all = Gain(randperm(size(Gain,1)),:); % reshuffle randomly
+% Gain_all = 24*(Gain_all./Gain_all);
 Gain_rand = repmat(Gain_all,n_rep,1); % repeat gains for n_rep
 
 % Gain_all = repmat(Gain,n_rep,1); % repeat gains for n_rep
@@ -148,7 +149,7 @@ for kk = 1:n_rep*nVel
     disp(['move ground ' num2str(gain)])
     Panel_com('stop');pause(n_pause);
     Panel_com('set_pattern_id', patID);pause(n_pause)               % pattern = 
-    Panel_com('set_position',[1, posY]);pause(n_pause)              % set starting position (xpos,ypos) [ypos = spatFreq]
+    Panel_com('set_position',[randi([1,96]), posY]);pause(n_pause) 	% set starting position (xpos,ypos) [ypos = spatFreq]
     Panel_com('set_funcX_freq', 50);pause(n_pause);                 % default X update rate
     Panel_com('set_funcY_freq', 50);pause(n_pause);                 % default Y update rate
     Panel_com('set_mode', [0,0]);pause(n_pause)                     % 0=open,1=closed,2=fgen,3=vmode,4=pmode
