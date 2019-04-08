@@ -99,7 +99,7 @@ for kk = 1:n_rep*nVel
     disp(['move ground ' num2str(gain)])
     Panel_com('stop');pause(n_pause);
     Panel_com('set_pattern_id', patID);pause(n_pause)               % pattern = (Pattern_spatFreq_22_30_60 or Pattern_Random_Ground_48)
-    Panel_com('set_position',[1, posY]);pause(n_pause)              % set starting position (xpos,ypos) [ypos = spatFreq]
+    Panel_com('set_position',[randi([1,96]), posY]);pause(n_pause) 	% set starting position (xpos,ypos) [ypos = spatFreq]
     Panel_com('set_funcX_freq', 50);pause(n_pause);                 % default X update rate
     Panel_com('set_funcY_freq', 50);pause(n_pause);                 % default Y update rate
     Panel_com('set_mode', [0,0]);pause(n_pause)                     % 0=open,1=closed,2=fgen,3=vmode,4=pmode
