@@ -1,5 +1,5 @@
 function [] = Experiment_Asymmetry_Control(Fn,spatFreq)
-% Experiment_Asymmetry_Control_Contrast: runs an experiment using LED arena and fly panel controller
+% Experiment_Asymmetry_Control: runs an experiment using LED arena and fly panel controller
 % This code is written for Panel Controller v3 and NiDAQ seesion mode
 % NOTES:    1. The pattern can be of HIGH or LOW contrast or INTERPOLATED MOTION (requires three different sets of patterns)
 %           2. User must maunally set the root folder in the fucntion
@@ -12,7 +12,8 @@ daqreset
 imaqreset
 %% Set Directories & Controller Parameters %%
 %---------------------------------------------------------------------------------------------------------------------------------
-rootdir = ['D:\EXPERIMENTS\Experiment_Asymmetry_Control_Verification\LowContrast\' num2str(spatFreq) '\'];
+% rootdir = ['D:\EXPERIMENTS\Experiment_Asymmetry_Control_Verification\LowContrast\' num2str(spatFreq) '\'];
+rootdir = ['D:\EXPERIMENTS\Experiment_Asymmetry_Control_Verification\HighContrast\' num2str(spatFreq) '\'];
 viddir = [rootdir 'Vid\'];
 % validSpatFreq = 7.5*[3,4,8];
 switch spatFreq
@@ -20,14 +21,17 @@ switch spatFreq
         patID = 5;
         posY  = 1;
     case 22.5
-        patID = 7;
+        patID = 8;
         posY  = 3;
     case 30
-        patID = 7;
+        patID = 8;
         posY  = 4;
     case 60
-        patID = 7;
+        patID = 8;
         posY  = 6;
+	case 1000
+        patID = 7;
+        posY  = 1;
     otherwise
         error('Invalid Spatial Frequency!!')
 end
@@ -64,7 +68,6 @@ s.IsContinuous = false;          % continuous data collection until stopped
 % Setup Sampling
 s.Rate = 5000; % samples per second
 s.IsContinuous = false;	% continuous data collection until stopped
-
 
 FrameRate = 200; % camera frame rate
 nFrame = FrameRate * n_tracktime; % # of frames to log
@@ -124,7 +127,7 @@ Gain_rand = repmat(Gain_all,n_rep,1); % repeat gains for n_rep
 %% START EXPERIMENT AND DATA COLLECTION %%
 %---------------------------------------------------------------------------------------------------------------------------------
 tic
-for kk = 1:n_rep*nVel
+for kk = 31:n_rep*nVel
     disp('-------------------------------------------------------')
     gain = Gain_rand(kk); % gain corresponding to velocity for trial
     disp(['Trial:  ' num2str(kk)]) % prints counter to command line
