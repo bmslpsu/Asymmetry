@@ -1,19 +1,14 @@
 function [] = Analyze_Asymmetry_Verification()
-%---------------------------------------------------------------------------------------------------------------------------------
-% Analyze_Asymmetry_Verification: calculates WBA in response to CW & CCW
+%% Analyze_Asymmetry_Verification: calculates WBA in response to CW & CCW
 % ramps, compares DAQ & VIDEO measurments for new data
 %   INPUTS:
 %
 %   OUTPUTS:
 %
-%---------------------------------------------------------------------------------------------------------------------------------
-% User sets these variables %
-showplot.Time = 0; % shows all WBA trials when loading data
-showplot.Freq = 0; % shows all WBF trials when loading data
-%---------------------------------------------------------------------------------------------------------------------------------
+
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'H:\EXPERIMENTS\Experiment_Asymmetry_George\';
+root.daq = 'F:\EXPERIMENTS\Experiment_Asymmetry_George\';
 % root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory
@@ -123,36 +118,6 @@ for kk = 1:nTrial
     % Store data in cells %
 	WINGS.daq.wba 	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = wings.daq.wba;
 % 	WINGS.vid.wba  	{idxFly(kk),1}{idxVel(kk),1}(:,end+1) = wings.vid.wba;
-    %-----------------------------------------------------------------------------------------------------------------------------
-    if showplot.Time
-    figure (1) ; hold on ; box on
-        xlabel('Time (s)')
-        ylabel('V')
-        if Vel(kk)>0
-            plot(WINGS.daq.time,wings.daq.wba,'b')
-        elseif Vel(kk)<0
-            plot(WINGS.daq.time,wings.daq.wba,'r')
-        end
-%     figure (2) ; hold on ; box on
-%         xlabel('Time (s)')
-%         ylabel('deg')
-%         if Vel(kk)>0
-%             plot(WINGS.vid.time,wings.vid.wba,'b')
-%         elseif Vel(kk)<0
-%             plot(WINGS.vid.time,wings.vid.wba,'r')
-%         end
-    end
-    
-    if showplot.Freq
-	figure (3) ; hold on ; box on
-        xlabel('Time (s)')
-        ylabel('WB Frequency (Hz)')
-        if Vel(kk)>0
-            plot(WINGS.daq.time,wings.F,'b')
-        elseif Vel(kk)<0
-            plot(WINGS.daq.time,wings.F,'r')
-        end        
-    end
     %-----------------------------------------------------------------------------------------------------------------------------
 end
 disp('DONE')
