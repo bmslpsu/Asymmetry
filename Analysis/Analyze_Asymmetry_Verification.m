@@ -13,7 +13,7 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'E:\Experiment_Asymmetry_Verification\';
+root.daq = 'D:\EXPERIMENTS\Experiment_Asymmetry_Verification\';
 % root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory

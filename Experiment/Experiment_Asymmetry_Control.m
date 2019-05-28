@@ -127,7 +127,7 @@ Gain_rand = repmat(Gain_all,n_rep,1); % repeat gains for n_rep
 %% START EXPERIMENT AND DATA COLLECTION %%
 %---------------------------------------------------------------------------------------------------------------------------------
 tic
-for kk = 31:n_rep*nVel
+for kk = 1:n_rep*nVel
     disp('-------------------------------------------------------')
     gain = Gain_rand(kk); % gain corresponding to velocity for trial
     disp(['Trial:  ' num2str(kk)]) % prints counter to command line
