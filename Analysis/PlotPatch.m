@@ -20,6 +20,6 @@ lE = dataMean - nSTD*dataSTD./sqrt(nFly);
 yP = [lE;flipud(uE)];
 xP = [dataX;flipud(dataX)];
 h1 = patch(xP,yP,1,'facecolor',faceColor,'edgecolor',lineColor);
-h2 = plot(dataX,dataMean,'Color',lineColor,'LineWidth',lineWidth);
+h2 = plot(dataX,dataMean,'-','Color',lineColor,'LineWidth',lineWidth);
 alpha(h1,alphaVal)
 end
