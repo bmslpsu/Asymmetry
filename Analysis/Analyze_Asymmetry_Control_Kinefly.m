@@ -339,8 +339,6 @@ speed = TrialCount(:,2);
 dir = TrialCount(:,3);
 tcount = TrialCount(:,4);
 
-
-
 F = figure (7); 
 set(F, 'Renderer', 'painters', 'Units','inch', 'Position', [1,1, 8.5, 8.5]);
 subplot(subRows, 1, subCurrent)
