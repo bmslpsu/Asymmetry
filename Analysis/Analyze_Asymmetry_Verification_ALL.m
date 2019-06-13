@@ -10,10 +10,11 @@ function [] = Analyze_Asymmetry_Verification_ALL()
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
 root = [];
-root{end+1}	= 'H:\EXPERIMENTS\Experiment_Asymmetry';
-root{end+1} = 'H:\EXPERIMENTS\Experiment_Asymmetry_Verification';
-root{end+1} = 'H:\EXPERIMENTS\Experiment_Asymmetry_Arena2';
-root{end+1} = 'H:\EXPERIMENTS\Experiment_Asymmetry_George';
+root{end+1}	= 'S:\Restricted\BC\EXPERIMENTS\Experiment_Asymmetry';
+root{end+1} = 'S:\Restricted\BC\EXPERIMENTS\Experiment_Asymmetry_Verification';
+root{end+1} = 'S:\Restricted\BC\EXPERIMENTS\Experiment_Asymmetry_Arena2';
+root{end+1} = 'S:\Restricted\BC\EXPERIMENTS\Experiment_Asymmetry_George';
+root{end+1} = 'S:\Restricted\BC\EXPERIMENTS\Experiment_Asymmetry_JMM_v2';
 n.root = length(root);
 
 % Select Files
@@ -62,7 +63,7 @@ for ww = 1:n.root % data set
         wing.F = data(:,6);
         if min(wing.F)<1.40
             disp(['Low WBF:  Set ' num2str(ww) '/ Fly ' num2str(D{ww}{kk,1}) ' Trial ' num2str(D{ww}{kk,2})])
-            continue
+%             continue
         end
         %-------------------------------------------------------------------------------------------------------------------------
         % Get wing data from DAQ %
@@ -138,8 +139,8 @@ TrialCount = [];
 % Fly
 for jj = 1:n.cond+1-1
     for kk = 1:size(WING.FlyAllWBA{jj},2)
-        h.fly = plot(WING.Time,WING.FlyAllWBA{jj}(:,kk),'Color',cList{jj},'LineWidth',2);
-        h.fly.Color(4) = 0.2;
+%         h.fly = plot(WING.Time,WING.FlyAllWBA{jj}(:,kk),'Color',cList{jj},'LineWidth',2);
+%         h.fly.Color(4) = 0.2;
         TrialCount = [TrialCount; kk jj 1 size(WING.WBA{kk,jj},2)];
         if TrialCount(end,4)<3
             disp('Here')

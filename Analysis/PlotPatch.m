@@ -15,6 +15,10 @@ function [h1,h2] = PlotPatch(dataMean,dataSTD,dataX,nSTD,nFly,lineColor,faceColo
 %       h1          : patch handle
 %       h2          : mean curve handle
 %---------------------------------------------------------------------------------------------------------------------------------      
+dataMean    = dataMean(:);
+dataSTD     = dataSTD(:);
+dataX       = dataX(:);
+
 uE = dataMean + nSTD*dataSTD./sqrt(nFly);
 lE = dataMean - nSTD*dataSTD./sqrt(nFly);
 yP = [lE;flipud(uE)];
