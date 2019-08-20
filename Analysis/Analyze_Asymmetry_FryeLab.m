@@ -12,7 +12,8 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %---------------------------------------------------------------------------------------------------------------------------------
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
-root.daq = 'Q:\Box Sync\Research\Asymmetry\FryeLab\';
+% root.daq = 'Q:\Box Sync\Research\Asymmetry\FryeLab\';
+root.daq = 'C:\Users\boc5244\Documents\BoxSync\Box Sync\Research\Asymmetry\FryeLab\';
 % root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory
@@ -133,7 +134,7 @@ end
 disp('DONE')
 %% DAQ Figure %%
 %---------------------------------------------------------------------------------------------------------------------------------
-figure (4) ; clf ; hold on ; box on ; ylim([-6 6])
+figure (4) ; clf ; hold on ; box on ; ylim(2*[-1 1])
 xlabel('Time (s)')
 ylabel('V')
 WINGS.daq.FlyMean = [];
@@ -165,9 +166,9 @@ for kk = 1:nFly
     h2.Color(4) = 0.3;
 end
 
-% for kk = 1:nFly
-% 	plot(WINGS.daq.time,WINGS.daq.FlyMean.off{kk,1},'k','LineWidth',2)
-% end
+for kk = 1:nFly
+	plot(WINGS.daq.time,WINGS.daq.FlyMean.off{kk,1},'k','LineWidth',2)
+end
 
 % grand means
 WINGS.daq.GrandMean.off = mean(cat(3,WINGS.daq.FlyMean.off{:}),3);
@@ -177,9 +178,9 @@ WINGS.daq.GrandSTD.off = std(cat(3,WINGS.daq.FlyMean.off{:}),0,3);
 WINGS.daq.GrandSTD.wba = std((cat(3,WINGS.daq.FlyMean.wba{:})),0,3);
 
 % plot grand means
-[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,1),WINGS.daq.GrandSTD.wba(:,1),WINGS.daq.time,1,nFly,'r',[0.5 0.5 0.5],0.8,7);
-[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,2),WINGS.daq.GrandSTD.wba(:,2),WINGS.daq.time,1,nFly,'b',[0.5 0.5 0.5],0.8,7);
+[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,1),WINGS.daq.GrandSTD.wba(:,1),WINGS.daq.time,1,nFly,'r',[0.5 0.5 0.5],0.8,5);
+[~,~] = PlotPatch(WINGS.daq.GrandMean.wba(:,2),WINGS.daq.GrandSTD.wba(:,2),WINGS.daq.time,1,nFly,'b',[0.5 0.5 0.5],0.8,5);
 [~,~] = PlotPatch(WINGS.daq.GrandMean.off,(WINGS.daq.GrandSTD.wba(:,1) + WINGS.daq.GrandSTD.wba(:,2)),WINGS.daq.time,1,nFly,...
-    'k',[0.5 0.5 0.5],0.8,8);
+    'k',[0.5 0.5 0.5],0.8,6);
 plot(WINGS.daq.time,0*WINGS.daq.time,'-g','LineWidth',1)
 end
