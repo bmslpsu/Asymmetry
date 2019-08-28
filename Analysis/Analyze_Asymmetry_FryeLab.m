@@ -13,7 +13,7 @@ showplot.Freq = 0; % shows all WBF trials when loading data
 %% Setup Directories %%
 %---------------------------------------------------------------------------------------------------------------------------------
 % root.daq = 'Q:\Box Sync\Research\Asymmetry\FryeLab\';
-root.daq = 'C:\Users\boc5244\Documents\BoxSync\Box Sync\Research\Asymmetry\FryeLab\';
+root.daq = 'H:\EXPERIMENTS\Experiment_Asymmetry_Frye\';
 % root.vid = [root.daq 'Vid\Angles\'];
 
 % Select VIDEO angle files & set DAQ file directory
@@ -135,6 +135,7 @@ disp('DONE')
 %% DAQ Figure %%
 %---------------------------------------------------------------------------------------------------------------------------------
 figure (4) ; clf ; hold on ; box on ; ylim(2*[-1 1])
+set(gcf,'Color','w')
 xlabel('Time (s)')
 ylabel('V')
 WINGS.daq.FlyMean = [];
