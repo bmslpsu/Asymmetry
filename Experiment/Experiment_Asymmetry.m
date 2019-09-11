@@ -8,14 +8,14 @@ daqreset
 imaqreset
 %% Set directories & experimental paramters %%
 %---------------------------------------------------------------------------------------------------------------------------------
-rootdir = 'E:\Experiment_Asymmetry_Verification\';
+rootdir = 'C:\BC\Rigid_data\Experiment_Asymmetry_George\';
 viddir = [rootdir '\Vid\'];
 
 % EXPERIMENTAL PARAMETERS
 n_tracktime = 10;           % length(func)/fps; seconds for each EXPERIMENT
-n_resttime = 5;             % seconds for each REST
+n_resttime = 3;             % seconds for each REST
 n_pause = 0.2;              % seconds for each pause between panel commands
-n_trial = 30;               % # trials per fly
+n_trial = 20;               % # trials per fly
 n_AI = 6;                   % # of analog input channels
 
 %% Set up data acquisition on NiDAQ (session mode) %%
@@ -133,9 +133,9 @@ for ii = 1:n_trial
 	% EXPERIMENT SETUP %
     pause(1)
     disp(['Play Stimulus: dir = ' num2str(Rdir(ii))])
-    Panel_com('set_pattern_id', 2); pause(n_pause)                	% set pattern to "Pattern_Random_Ground_48"
+    Panel_com('set_pattern_id', 7); pause(n_pause)                	% set pattern to "Pattern_Random_Ground_48"
     Panel_com('set_position',[randi([1, 96]), 1]); pause(n_pause)  	% set starting position (xpos,ypos)
-    Panel_com('set_posfunc_id',[1, 0]); pause(n_pause)               % arg1 = channel (x=1,y=2); arg2 = funcid
+    Panel_com('set_posfunc_id',[1, 0]); pause(n_pause)             	% arg1 = channel (x=1,y=2); arg2 = funcid
 	Panel_com('set_funcX_freq', 50); pause(n_pause)                 % 50Hz update rate for x-channel
     Panel_com('set_funcY_freq', 50); pause(n_pause)              	% 50Hz update rate for y-channel
     Panel_com('set_mode', [0,0]); pause(n_pause)                    % 0=open,1=closed,2=fgen,3=vmode,4=pmode
