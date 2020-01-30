@@ -1,6 +1,6 @@
 function [h1,h2] = PlotPatch(dataMean,dataSTD,dataX,nSTD,nFly,lineColor,faceColor,alphaVal,lineWidth)
 %% PlotPatch: Plots mean/med & STD as patch
-%   INPUTS:
+%   INPUT:
 %       dataMean    : mean/med data
 %       dataSTD     : std of data
 %       dataX       : x-axis points
@@ -11,10 +11,11 @@ function [h1,h2] = PlotPatch(dataMean,dataSTD,dataX,nSTD,nFly,lineColor,faceColo
 %       faceColor   : pathc area color
 %       alphaVal    : patch transparancy (0-1)
 %       lineWidth  	: linewidth of main curve
-%   OUTPUTS
+%   OUTPUT:
 %       h1          : patch handle
 %       h2          : mean curve handle
-%---------------------------------------------------------------------------------------------------------------------------------      
+%
+
 dataMean    = dataMean(:);
 dataSTD     = dataSTD(:);
 dataX       = dataX(:);
