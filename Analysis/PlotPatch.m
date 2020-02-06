@@ -26,5 +26,6 @@ yP = [lE;flipud(uE)];
 xP = [dataX;flipud(dataX)];
 h1 = patch(xP,yP,1,'facecolor',faceColor,'edgecolor',lineColor);
 h2 = plot(dataX,dataMean,'-','Color',lineColor,'LineWidth',lineWidth);
+h1.EdgeColor = 'none';
 alpha(h1,alphaVal)
 end
