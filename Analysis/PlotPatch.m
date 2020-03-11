@@ -24,6 +24,8 @@ uE = dataMean + nSTD*dataSTD./sqrt(nFly);
 lE = dataMean - nSTD*dataSTD./sqrt(nFly);
 yP = [lE;flipud(uE)];
 xP = [dataX;flipud(dataX)];
+
+hold on
 h1 = patch(xP,yP,1,'facecolor',faceColor,'edgecolor',lineColor);
 h2 = plot(dataX,dataMean,'-','Color',lineColor,'LineWidth',lineWidth);
 h1.EdgeColor = 'none';
